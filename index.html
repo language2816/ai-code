@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雙格單人動作提示詞</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #111318;
+    --surface: #1c1f27;
+    --card: #22262f;
+    --border: #2e3240;
+    --text: #e8eaf0;
+    --muted: #6b7080;
+    --red: #e8453c;
+    --blue: #3c7fe8;
+    --gold: #e8b43c;
+    --green: #3cb87a;
+    --radius: 14px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 5rem;
+    background-image:
+      radial-gradient(ellipse 70% 40% at 0% 0%, rgba(232,69,60,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 35% at 100% 100%, rgba(60,127,232,0.07) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    max-width: 920px;
+    margin: 0 auto 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.4rem;
+  }
+
+  .header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .header h1 .r { color: var(--red); }
+  .header h1 .b { color: var(--blue); }
+  .header p { color: var(--muted); font-size: 0.82rem; margin-top: 0.5rem; line-height: 1.6; }
+
+  .concept-badge {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.8;
+    white-space: nowrap;
+  }
+
+  .concept-badge span { display: block; color: var(--gold); font-size: 1.1rem; }
+
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 920px; margin: 0 auto; }
+
+  .mono-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── CATEGORY TABS ── */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.16s;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+
+  .tab:hover { color: var(--text); border-color: #4a5060; }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 700; }
+
+  /* ── PAIR CARDS ── */
+  .pairs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  .pair-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+  }
+
+  .pair-card:hover { transform: translateY(-2px); border-color: #4a5060; }
+  .pair-card.sel { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 8px 28px rgba(232,180,60,0.12); }
+
+  /* Two figure boxes side by side */
+  .figures {
+    display: grid;
+    grid-template-columns: 1fr 20px 1fr;
+    gap: 0;
+    align-items: center;
+    margin-bottom: 0.9rem;
+  }
+
+  .fig {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 0.75rem 0.4rem 0.5rem;
+    text-align: center;
+  }
+
+  .fig .icon { font-size: 1.8rem; display: block; }
+
+  .fig .side-tag {
+    display: inline-block;
+    margin-top: 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  .fig.left-fig .side-tag { background: rgba(232,69,60,0.15); color: var(--red); }
+  .fig.right-fig .side-tag { background: rgba(60,127,232,0.15); color: var(--blue); }
+
+  .fig .action-name {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-top: 0.3rem;
+    color: var(--text);
+  }
+
+  .sep-arrow {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--gold);
+    font-weight: 900;
+  }
+
+  .pair-title { font-weight: 700; font-size: 0.88rem; margin-bottom: 0.2rem; }
+  .pair-desc { font-size: 0.73rem; color: var(--muted); line-height: 1.5; }
+  .pair-tag {
+    margin-top: 0.6rem;
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── OPTIONS ── */
+  .options-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .opt label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+
+  select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+    font-family: 'Noto Sans TC', sans-serif;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7080'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    padding-right: 1.8rem;
+  }
+
+  select:focus { border-color: var(--gold); }
+
+  /* ── GENERATE BUTTON ── */
+  .gen-wrap { text-align: center; margin-bottom: 2.5rem; }
+
+  .gen-btn {
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 50px;
+    padding: 0.85rem 2.8rem;
+    font-size: 1rem;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+    box-shadow: 0 4px 24px rgba(232,180,60,0.25);
+  }
+
+  .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,180,60,0.4); }
+  .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── OUTPUT ── */
+  #output { display: none; }
+  #output.show { display: block; }
+
+  /* Visual preview of the split */
+  .split-preview {
+    display: grid;
+    grid-template-columns: 1fr 4px 1fr;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    min-height: 130px;
+  }
+
+  .sp-half {
+    background: var(--card);
+    padding: 1.4rem 1rem 1.2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sp-divider { background: var(--border); }
+
+  .sp-half .big-icon { font-size: 3.2rem; }
+  .sp-half .sp-side {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+  }
+
+  .sp-half.left-half .sp-side { background: rgba(232,69,60,0.15); color: var(--red); }
+  .sp-half.right-half .sp-side { background: rgba(60,127,232,0.15); color: var(--blue); }
+
+  .sp-half strong { font-size: 0.95rem; }
+  .sp-half .sp-note { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+
+  /* Prompt blocks */
+  .prompt-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .prompt-block h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .prompt-block h3 .pill {
+    display: inline-block;
+    padding: 0.12rem 0.55rem;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    font-size: 0.6rem;
+  }
+
+  .pill-left { background: rgba(232,69,60,0.2); color: var(--red); }
+  .pill-right { background: rgba(60,127,232,0.2); color: var(--blue); }
+  .pill-both { background: rgba(232,180,60,0.2); color: var(--gold); }
+
+  .prompt-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.77rem;
+    line-height: 1.85;
+    color: #c0c8d8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+  }
+
+  .copy-btn {
+    margin-top: 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.15s;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .copy-btn.ok { border-color: var(--green); color: var(--green); }
+
+  .tip-box {
+    background: rgba(232,180,60,0.07);
+    border: 1px solid rgba(232,180,60,0.2);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    font-size: 0.78rem;
+    color: #b0a070;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tip-box strong { color: var(--gold); display: block; margin-bottom: 0.3rem; font-size: 0.72rem; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1><span class="r">左一人</span> ＋ <span class="b">右一人</span></h1>
+    <p>
+      左圖一個人做「舉起」的動作 ／ 右圖一個人做「騰空被舉起」的動作<br>
+      各自獨立生成，合在一起像一組互動畫面
+    </p>
+  </div>
+  <div class="concept-badge">
+    <span>🧍 ｜ 🧍</span>
+    LEFT &nbsp;|&nbsp; RIGHT<br>
+    單人 × 單人<br>
+    各自獨立生成
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="mono-label">選擇動作組合</div>
+  <div class="tabs" id="tabs"></div>
+
+  <div class="pairs-grid" id="pairsGrid"></div>
+
+  <div class="mono-label">細節設定</div>
+  <div class="options-panel">
+    <div class="opt">
+      <label>左圖人物</label>
+      <select id="personL">
+        <option value="a young Asian man">亞洲年輕男性</option>
+        <option value="a young Asian woman">亞洲年輕女性</option>
+        <option value="a young man">年輕男性</option>
+        <option value="a young woman">年輕女性</option>
+        <option value="a muscular man">肌肉男性</option>
+        <option value="an athletic woman">運動型女性</option>
+      </select>
+    </div>
+    <div class="opt">
+      <label>右圖人物</label>
+      <select id="personR">
+        <option value="a young Asian man">亞洲年輕男性</option>
+        <option value="a young Asian woman">亞洲年輕女性</option>
+        <option value="a young man">年輕男性</option>
+        <option value="a young woman">年輕女性</option>
+        <option value="a child">兒童</option>
+        <option value="a muscular man">肌肉男性</option>
+      </select>
+    </div>
+    <div class="opt">
+      <label>服裝</label>
+      <select id="clothes">
+        <option value="casual T-shirt and jeans">休閒 T 恤牛仔褲</option>
+        <option value="sportswear">運動服</option>
+        <option value="white plain T-shirt">純白 T 恤</option>
+        <option value="cheerleading uniform">啦啦隊服</option>
+        <option value="formal shirt">正式襯衫</option>
+      </select>
+    </div>
+    <div class="opt">
+      <label>背景</label>
+      <select id="bg">
+        <option value="pure white studio background">純白攝影棚</option>
+        <option value="soft light gray background">淺灰漸層</option>
+        <option value="seamless white background">無縫白背景</option>
+        <option value="outdoor natural light">戶外自然光</option>
+      </select>
+    </div>
+    <div class="opt">
+      <label>圖像風格</label>
+      <select id="style">
+        <option value="photorealistic, professional photography">真實攝影風</option>
+        <option value="clean commercial photography">商業攝影</option>
+        <option value="3D character render, Pixar style">3D 皮克斯風</option>
+        <option value="flat vector illustration">扁平插畫</option>
+      </select>
+    </div>
+    <div class="opt">
+      <label>視角方向</label>
+      <select id="angle">
+        <option value="side profile view, facing toward center">側面朝中間</option>
+        <option value="three-quarter view facing center">四分之三正面朝中間</option>
+        <option value="front-facing straight on">完全正面</option>
+        <option value="slight angle toward viewer">微角朝向觀者</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="gen-wrap">
+    <button class="gen-btn" id="genBtn" onclick="generate()">✦ 生成提示詞</button>
+  </div>
+
+  <div id="output">
+
+    <div class="tip-box">
+      <strong>💡 使用說明</strong>
+      下方是合圖提示詞，直接貼入 ChatGPT 即可一次生成左右兩格的完整畫面。
+    </div>
+
+    <div class="split-preview" id="splitPreview"></div>
+
+    <div class="prompt-block">
+      <h3><span class="pill pill-both">✦ 合圖提示詞</span> 直接貼入 ChatGPT / DALL-E</h3>
+      <div class="prompt-text" id="promptCombine"></div>
+      <button class="copy-btn" onclick="copyText('promptCombine', this)">[ 複製提示詞 ]</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const DATA = {
+  "🏋️ 舉起 / 托舉": [
+    {
+      label: "舉起 ↔ 騰空被舉",
+      desc: "左：雙手托起的施力姿勢／右：雙手展開騰空",
+      iconL: "🧍", iconR: "🙌",
+      nameL: "托舉者", nameR: "被舉者",
+      enL: "A person standing upright with both arms raised straight overhead, palms facing up, as if holding someone above them. Their legs are slightly apart for balance, knees slightly bent, looking upward. They are alone in frame — NO second person visible.",
+      enR: "A person suspended in mid-air, arms spread wide open, both legs together, looking exhilarated with mouth open. They appear to be lifted high up, feet off the ground. They are alone in frame — NO second person or hands visible beneath them.",
+      tag: "托舉特技"
+    },
+    {
+      label: "準備托舉 ↔ 跳躍騰起",
+      desc: "左：深蹲預備托人姿勢／右：跳起雙臂展開",
+      iconL: "🏋️", iconR: "🤸",
+      nameL: "蹲下準備", nameR: "跳躍展翅",
+      enL: "A person in a deep squat position, both hands raised upward at shoulder height, palms flat facing up, looking upward with focused expression. Crouched low and ready. They are alone in frame — NO second person visible.",
+      enR: "A person at the peak of a jump, both arms fully extended sideways like wings, legs together straight, head tilted up joyfully, body fully in the air. They are alone in frame — NO hands or other people touching them.",
+      tag: "啦啦隊風"
+    },
+  ],
+  "👋 推 / 接": [
+    {
+      label: "出拳推出 ↔ 被推後仰",
+      desc: "左：雙手向前推出用力／右：身體後仰受力",
+      iconL: "👊", iconR: "😵",
+      nameL: "推出者", nameR: "後仰者",
+      enL: "A person leaning forward, both arms fully extended straight ahead, palms out flat as if pushing something hard. Upper body leans forward with force. They are alone — NO second person visible, no contact.",
+      enR: "A person leaning dramatically backwards, upper body arched back, arms flung behind them, face showing surprise, one foot lifted as if stumbling back. They are alone — NO second person, nothing touching them.",
+      tag: "力量動作"
+    },
+    {
+      label: "拋出 ↔ 接住",
+      desc: "左：雙手拋出物體的出手姿勢／右：伸手接住的姿勢",
+      iconL: "⚾", iconR: "🧤",
+      nameL: "拋出者", nameR: "接球者",
+      enL: "A person in a throwing follow-through pose — dominant arm extended forward pointing ahead, other arm back for balance, body slightly rotated, weight shifted to front foot. They are alone — no object or person visible.",
+      enR: "A person leaning forward with both hands cupped together outstretched, eyes focused ahead, body slightly lunging, as if catching something coming toward them. They are alone — no object or person visible.",
+      tag: "拋接動作"
+    },
+  ],
+  "🤝 拉 / 扯": [
+    {
+      label: "用力拉繩 ↔ 被拉前傾",
+      desc: "左：身體後傾用力拉／右：身體前傾被拉動",
+      iconL: "💪", iconR: "😣",
+      nameL: "拉的一方", nameR: "被拉一方",
+      enL: "A person leaning far back, both arms pulling forward gripping an invisible rope, legs planted wide apart, entire body weight behind the pull, face straining with effort. They are alone — no rope, no other person visible.",
+      enR: "A person lurching forward involuntarily, arms stretched ahead, one foot lifting off the ground, body off-balance and leaning forward as if being pulled. They are alone — no rope, no other person touching them.",
+      tag: "拔河動作"
+    },
+    {
+      label: "伸手邀請 ↔ 被引導靠近",
+      desc: "左：伸手向側邊邀請的姿勢／右：手被牽引微微前傾",
+      iconL: "🫱", iconR: "🫲",
+      nameL: "邀請者", nameR: "被引導者",
+      enL: "A person standing elegantly, one arm extended outward to the side with open palm facing up, as if inviting someone to take their hand. Slight smile, relaxed posture. They are alone — no one touching their hand.",
+      enR: "A person reaching one arm forward, body slightly leaning in the direction of their outstretched arm, as if their hand is gently being led somewhere. Soft expression. They are alone — no one touching them.",
+      tag: "引導邀請"
+    },
+  ],
+  "💃 舞蹈 / 轉圈": [
+    {
+      label: "引導旋轉手勢 ↔ 旋轉中的舞者",
+      desc: "左：手臂引導旋轉的帶領者姿勢／右：旋轉中裙擺飛揚",
+      iconL: "🕺", iconR: "💃",
+      nameL: "帶領者", nameR: "旋轉者",
+      enL: "A person standing with one arm raised and extended outward, wrist slightly curved, in the pose of a dance lead guiding a partner's spin. Other hand on hip, weight on one leg. They are alone — no partner visible.",
+      enR: "A person mid-spin, arms slightly outstretched, head turned with hair or clothing flowing from the rotation, one foot slightly off ground, face joyful. They are alone — no partner visible, no one holding them.",
+      tag: "雙人舞拆分"
+    },
+    {
+      label: "鞠躬邀舞 ↔ 接受邀請姿勢",
+      desc: "左：優雅鞠躬伸手邀舞／右：含蓄接受姿勢",
+      iconL: "🎩", iconR: "🌹",
+      nameL: "邀舞者", nameR: "被邀者",
+      enL: "A person bowing gracefully forward at the waist, one arm extended outward with open palm offering a hand, the other arm tucked behind the back. Eyes looking up with a charming smile. They are alone.",
+      enR: "A person standing upright with a slight smile, one hand gently extending forward as if about to accept an offered hand, chin slightly lowered in a polite gesture. They are alone.",
+      tag: "邀舞禮儀"
+    },
+  ],
+  "🏃 追 / 逃": [
+    {
+      label: "追趕衝刺 ↔ 逃跑奔跑",
+      desc: "左：身體前傾全力追跑，手臂向前伸／右：回頭看的奔逃姿",
+      iconL: "🏃", iconR: "😱",
+      nameL: "追趕者", nameR: "逃跑者",
+      enL: "A person sprinting forward at full speed, body leaning far forward, one arm outstretched reaching ahead, legs in mid-stride. Intense determined expression. They are alone — no one else visible.",
+      enR: "A person running in panic, head turned to look back over their shoulder with a frightened expression, arms pumping, mid-stride with urgency. They are alone — no one chasing them visible.",
+      tag: "追逃動態"
+    },
+  ],
+  "🙌 歡呼 / 慶祝": [
+    {
+      label: "勝利高舉 ↔ 歡呼回應",
+      desc: "左：單手高舉勝利姿勢／右：雙手歡呼向上",
+      iconL: "🏆", iconR: "🎉",
+      nameL: "勝利者", nameR: "歡呼者",
+      enL: "A person standing tall, one fist raised high above their head in a victorious gesture, chin lifted, huge smile, chest puffed with pride. They are alone.",
+      enR: "A person with both arms raised up high, hands open and fingers spread, mouth wide open cheering, face full of joy and excitement. They are alone.",
+      tag: "慶祝歡呼"
+    },
+  ],
+  "💕 曖昧 / 溫柔": [
+    {
+      label: "靠近傾身 ↔ 含羞側臉",
+      desc: "左：身體微微前傾靠近，眼神深情／右：側臉微低，嘴角微笑帶羞澀",
+      iconL: "😏", iconR: "🥹",
+      nameL: "靠近者", nameR: "害羞者",
+      enL: "A person leaning forward slightly with a soft, confident smile, eyes looking gently to one side as if gazing at someone close by. Body tilted forward, relaxed but intentional, one hand lightly resting near their chest. They are alone — no other person visible.",
+      enR: "A person turning their face slightly to the side and downward, a small shy smile on their lips, a faint blush on their cheeks, one hand lightly touching their own collarbone, eyes glancing upward. They are alone — no other person visible.",
+      tag: "含羞曖昧"
+    },
+    {
+      label: "輕撥髮絲 ↔ 微閉眼享受",
+      desc: "左：手伸向側邊，指尖輕撥想像中的髮絲／右：微微閉眼，臉微仰享受",
+      iconL: "🤚", iconR: "😌",
+      nameL: "撥髮者", nameR: "被觸碰者",
+      enL: "A person with one arm gently raised to the side, fingers lightly extended as if delicately brushing someone's hair aside. Soft tender expression, eyes gentle and warm. They are alone — fingers touching nothing visible.",
+      enR: "A person with eyes softly closed, face tilted very slightly upward, a calm blissful expression, as if savoring a gentle touch on their hair. Body relaxed, slight smile. They are alone — nothing visible touching them.",
+      tag: "溫柔觸碰"
+    },
+    {
+      label: "凝視對望 ↔ 對視回眸",
+      desc: "左：目光深情直視前方，嘴角微揚／右：回頭凝視，眼神柔和",
+      iconL: "👀", iconR: "🫦",
+      nameL: "深情凝視", nameR: "回眸對望",
+      enL: "A person looking directly forward with a warm, slightly intense gaze, lips curved in a subtle smile, chin slightly lifted, completely still and focused as if locked in eye contact. They are alone.",
+      enR: "A person turning their head to look back over their shoulder, soft romantic expression, hair slightly swept to one side, eyes meeting the viewer's gaze with warmth and depth. They are alone.",
+      tag: "對視曖昧"
+    },
+    {
+      label: "伸手想牽 ↔ 猶豫伸手",
+      desc: "左：一手輕輕向旁伸出，手掌微張期待／右：手也緩緩伸出，指尖微顫猶豫",
+      iconL: "🫱", iconR: "🫲",
+      nameL: "主動伸手", nameR: "猶豫回應",
+      enL: "A person with one arm gently extended to the side, palm open and slightly upturned, fingers relaxed and waiting, expression soft and hopeful, eyes looking sideways with quiet longing. They are alone — no hand meeting theirs.",
+      enR: "A person slowly extending one arm outward, fingers slightly trembling, expression a mix of nervousness and longing, eyes cast slightly downward then forward as if gathering courage. They are alone — no hand meeting theirs.",
+      tag: "牽手瞬間"
+    },
+  ],
+  "🔥 激情 / 戲劇": [
+    {
+      label: "抓領衣前傾 ↔ 被拉後仰",
+      desc: "左：雙手向前伸，彷彿抓住對方領口用力拉近／右：身體後仰，頸部微揚被拉住感",
+      iconL: "😤", iconR: "😳",
+      nameL: "拉近者", nameR: "被拉者",
+      enL: "A person leaning forward intensely, both hands gripping forward at chest height as if clutching someone's collar, jaw set, eyes burning with emotion, body weight shifted forward. They are alone — gripping nothing visible.",
+      enR: "A person leaning backward with neck slightly arched, chin lifted, a startled yet electrified expression, arms slightly back as if their collar has been grabbed and pulled. They are alone — nothing visible touching them.",
+      tag: "激情拉近"
+    },
+    {
+      label: "壁咚逼近 ↔ 背靠牆被逼近",
+      desc: "左：一手撐牆前傾，眼神強烈／右：背靠牆，側臉微仰心跳加速",
+      iconL: "🧱", iconR: "💓",
+      nameL: "壁咚者", nameR: "被壁咚",
+      enL: "A person leaning forward with one arm extended, palm pressing against an invisible wall, body angled forward, face close and intense, eyes fixed ahead with a smoldering gaze. They are alone — only pressing the wall.",
+      enR: "A person with their back lightly against a wall, face turned slightly to one side and chin lifted, eyes wide and lips parted in a surprised yet flustered expression, hands flat against the wall behind them. They are alone — nothing pinning them.",
+      tag: "壁咚名場面"
+    },
+    {
+      label: "回頭一吻靠近 ↔ 閉眼等待",
+      desc: "左：側臉轉向，嘴唇微張靠近／右：臉微仰閉眼，嘴唇微微噘起等待",
+      iconL: "😘", iconR: "🫦",
+      nameL: "主動靠近", nameR: "閉眼等待",
+      enL: "A person turning their face to the side, eyes half-closed, lips slightly parted and leaning forward as if moving in for a kiss, expression tender and certain. They are alone — lips approaching nothing visible.",
+      enR: "A person with face tilted upward slightly, eyes gently closed, lips just barely pursed, expression utterly calm and surrendered, waiting. They are alone — nothing approaching them visibly.",
+      tag: "接吻前一秒"
+    },
+    {
+      label: "抬下巴 ↔ 臉被抬起",
+      desc: "左：手肘彎曲、拇指與食指輕捏成托下巴的手形，掌心朝上向前微伸／右：下巴微抬，眼神迷離上看",
+      iconL: "🤌", iconR: "😶‍🌫️",
+      nameL: "抬下巴者", nameR: "被抬下巴",
+      enL: "A person standing in side profile, arm bent at the elbow, hand raised to chest-chin height with thumb and index finger gently pinched together forming a soft grip — as if delicately cupping and lifting someone's chin from below. Palm facing upward, remaining fingers loosely curled. Expression is calm, tender, and slightly intense. They are alone — hand is holding nothing visible. NOT pointing a finger forward.",
+      enR: "A person standing in side profile, chin tilted upward as if gently lifted by someone's hand, eyes half-lidded and gazing softly upward, neck slightly elongated and exposed, lips barely parted, expression vulnerable and dreamy. They are alone — nothing visible touching their chin.",
+      tag: "抬下巴名場面"
+    },
+  ],
+  "🐣 依偎 / 倚靠": [
+    {
+      label: "張開臂彎 ↔ 側身靠入",
+      desc: "左：單臂張開，身體微側作出擁抱空間／右：側身微傾，像靠入臂彎的姿勢",
+      iconL: "🤗", iconR: "🥰",
+      nameL: "張臂迎接", nameR: "靠入者",
+      enL: "A person standing with one arm open and extended to the side, body turned slightly, with a warm welcoming expression as if making space for someone to lean in. They are alone — arm open to empty space.",
+      enR: "A person leaning their body gently to one side, head slightly tilted, eyes soft and content, as if resting against someone's shoulder or arm. They are alone — leaning into empty space.",
+      tag: "依偎臂彎"
+    },
+    {
+      label: "大腿枕準備 ↔ 躺下側臥",
+      desc: "左：坐姿雙腿平放，一手輕放大腿上等待／右：側躺姿勢，頭枕著想像中的大腿",
+      iconL: "🪑", iconR: "😴",
+      nameL: "腿枕提供者", nameR: "躺在腿上者",
+      enL: "A person sitting on the ground with legs extended flat and together, one hand resting gently on their thigh, looking down softly as if watching someone resting on their lap. They are alone — lap is empty.",
+      enR: "A person lying on their side in a relaxed curled position, head resting as if on a pillow (no pillow visible), eyes softly closed or gazing upward dreamily, body completely at ease. They are alone — nothing beneath their head.",
+      tag: "膝枕名場面"
+    },
+    {
+      label: "背對靠背 ↔ 背靠背坐",
+      desc: "左右皆為背對而坐，各自面向外，微微倚靠的姿勢",
+      iconL: "🔙", iconR: "🔚",
+      nameL: "靠背者A", nameR: "靠背者B",
+      enL: "A person sitting on the ground facing forward, back straight but relaxed, leaning very slightly backward as if resting against someone behind them. Eyes looking forward or slightly down, calm and comfortable. They are alone — back touching nothing visible.",
+      enR: "A person sitting on the ground facing away from the viewer, back upright and slightly leaning backward, relaxed posture, as if back-to-back with someone. They are alone — back touching nothing visible.",
+      tag: "背靠背溫柔"
+    },
+  ],
+  "🎒 揹負 / 扛起": [
+    {
+      label: "彎腰準備揹人 ↔ 趴上去的姿勢",
+      desc: "左：身體前傾弓背，雙臂向後伸準備接人／右：身體前傾，雙臂向前伸如趴上去",
+      iconL: "🏇", iconR: "🐒",
+      nameL: "揹人者", nameR: "被揹者",
+      enL: "A person bending forward at the waist, back arched flat and horizontal, arms reaching slightly backward and downward as if ready to give someone a piggyback ride. Looking forward or slightly down. They are alone — back is empty.",
+      enR: "A person leaning their upper body forward with arms stretched out in front, as if jumping onto someone's back for a piggyback ride, knees slightly bent, expression playful and excited. They are alone — arms grasping empty air.",
+      tag: "揹人名場面"
+    },
+    {
+      label: "扛在肩上站立 ↔ 被扛肩上坐姿",
+      desc: "左：雙手扶穩肩側，身體直立承重／右：坐於空中，雙手展開保持平衡",
+      iconL: "💪", iconR: "🙋",
+      nameL: "扛人者", nameR: "坐肩上者",
+      enL: "A person standing upright with both arms raised to shoulder height, hands gripping upward as if steadying someone sitting on their shoulders, legs slightly apart for balance, looking forward with effort. They are alone — shoulders are empty.",
+      enR: "A person in a seated posture with legs hanging down on either side, hands loosely out for balance, looking ahead with a giddy delighted expression, as if perched high on someone's shoulders. They are alone — nothing beneath them visible.",
+      tag: "坐肩上"
+    },
+    {
+      label: "公主抱準備 ↔ 被抱起橫躺",
+      desc: "左：雙臂水平張開，微微下蹲準備抱人／右：側躺空中姿態，雙臂環繞想像",
+      iconL: "🤲", iconR: "👸",
+      nameL: "公主抱者", nameR: "被公主抱",
+      enL: "A person with both arms extended forward and slightly bent at the elbow, as if about to scoop someone up in a bridal carry, body slightly crouched and leaning forward, expression gentle and strong. They are alone — arms holding nothing.",
+      enR: "A person in a reclining horizontal pose, body turned sideways, one arm draped over where a neck would be, legs together and slightly bent, expression soft and relaxed as if being carried. They are alone — floating with nothing beneath them.",
+      tag: "公主抱"
+    },
+  ],
+  "😢 情緒表達": [
+    {
+      label: "安慰拍肩 ↔ 低頭哭泣",
+      desc: "左：手伸向側邊，輕拍想像中對方的肩膀／右：低頭彎腰，肩膀微顫哭泣",
+      iconL: "🤝", iconR: "😭",
+      nameL: "安慰者", nameR: "哭泣者",
+      enL: "A person standing gently, one arm extended to the side at shoulder height, hand softly patting as if comforting someone beside them. Expression warm and empathetic, head tilted slightly toward the side. They are alone — hand patting empty air.",
+      enR: "A person bent slightly forward, head bowed down, shoulders hunched and slightly trembling, arms hanging or hands covering their face, expression of quiet crying. They are alone.",
+      tag: "安慰情緒"
+    },
+    {
+      label: "憤怒指責 ↔ 委屈縮身",
+      desc: "左：手指向前方指責，表情憤怒／右：身體縮小，雙手交叉護胸，委屈低頭",
+      iconL: "😤", iconR: "🥺",
+      nameL: "指責者", nameR: "委屈者",
+      enL: "A person standing with one arm outstretched, index finger pointing forward accusingly, jaw tight, brows furrowed in anger, body leaning forward with intensity. They are alone — pointing at nothing visible.",
+      enR: "A person shrinking slightly, arms crossed over their chest protectively, shoulders drawn inward, head lowered, expression hurt and dejected. They are alone.",
+      tag: "爭吵衝突"
+    },
+    {
+      label: "驚訝張嘴 ↔ 得意微笑",
+      desc: "左：雙手捂嘴，眼睛睜大驚訝／右：單手叉腰，嘴角上揚得意",
+      iconL: "😱", iconR: "😏",
+      nameL: "驚訝者", nameR: "得意者",
+      enL: "A person with both hands raised to cover their open mouth, eyes wide with shock and surprise, eyebrows raised high, body slightly recoiling. They are alone.",
+      enR: "A person standing with one hand on hip, chin slightly lifted, a smug satisfied smile playing on their lips, looking relaxed and confident. They are alone.",
+      tag: "反應對比"
+    },
+    {
+      label: "道歉鞠躬 ↔ 接受原諒",
+      desc: "左：深深鞠躬九十度，雙手貼大腿誠心道歉／右：微笑點頭，手勢示意沒關係",
+      iconL: "🙇", iconR: "🙆",
+      nameL: "道歉者", nameR: "原諒者",
+      enL: "A person bowing deeply at a 90-degree angle, both hands flat against their thighs, expression sincere and remorseful. They are alone.",
+      enR: "A person standing upright with a gentle forgiving smile, one hand raised slightly with open palm in a gesture of acceptance, expression warm and understanding. They are alone.",
+      tag: "道歉原諒"
+    },
+    {
+      label: "大笑捧腹 ↔ 傻眼無語",
+      desc: "左：雙手捧肚子仰頭大笑／右：嘴角微抽，眼神空洞傻眼",
+      iconL: "🤣", iconR: "😑",
+      nameL: "大笑者", nameR: "傻眼者",
+      enL: "A person laughing hysterically, hands clutching their stomach, head thrown back, mouth wide open, entire body shaking with laughter. They are alone.",
+      enR: "A person standing perfectly still with a blank deadpan expression, one eyebrow slightly raised, mouth flat, looking utterly unamused. They are alone.",
+      tag: "搞笑反應"
+    },
+  ],
+  "🧸 親密日常": [
+    {
+      label: "餵食 ↔ 張嘴等待",
+      desc: "左：手拿想像食物向前伸，像餵人的姿勢／右：微微張嘴仰臉等待被餵",
+      iconL: "🍴", iconR: "😋",
+      nameL: "餵食者", nameR: "等待被餵",
+      enL: "A person holding one hand forward at face height, pinching fingers together as if offering a small piece of food to someone, expression playful and affectionate. They are alone — fingers holding nothing visible.",
+      enR: "A person with face tilted slightly upward, mouth gently open in anticipation, eyes looking forward with a cute expectant expression, slightly leaning forward. They are alone — nothing approaching their mouth.",
+      tag: "餵食互動"
+    },
+    {
+      label: "遮眼驚喜 ↔ 被遮眼猜測",
+      desc: "左：雙手向前伸出，像蒙住對方眼睛的姿勢／右：雙手輕搭自己眼睛上方，笑著猜測",
+      iconL: "🙈", iconR: "🎁",
+      nameL: "遮眼者", nameR: "被遮眼",
+      enL: "A person leaning forward slightly with both hands extended forward at eye level, palms open as if covering someone else's eyes from behind, wearing a mischievous grin. They are alone — hands covering nothing.",
+      enR: "A person with both hands lightly hovering over their own eyes, a big smile on their face, clearly guessing and enjoying being surprised. They are alone.",
+      tag: "驚喜遮眼"
+    },
+    {
+      label: "整理衣領 ↔ 被整理站直",
+      desc: "左：雙手向前微伸，像幫人整理領口的細膩動作／右：下巴微抬站直，表情溫順享受被照顧",
+      iconL: "👔", iconR: "🧍",
+      nameL: "整理者", nameR: "被整理",
+      enL: "A person with both hands raised at chest height, fingers delicately adjusting as if fixing someone's collar or tie, expression focused and caring, leaning slightly forward. They are alone — hands touching nothing visible.",
+      enR: "A person standing very upright with chin slightly lifted, arms relaxed at sides, a small contented smile, allowing themselves to be taken care of. They are alone.",
+      tag: "日常照顧"
+    },
+    {
+      label: "搭肩走路 ↔ 被搭肩微笑",
+      desc: "左：側身，一手向側邊伸出搭在想像肩膀上／右：側身，肩膀微微下沉像被搭著，嘴角微揚",
+      iconL: "🚶", iconR: "😊",
+      nameL: "搭肩者", nameR: "被搭肩",
+      enL: "A person walking in profile, one arm extended sideways at shoulder height as if casually draping their arm over someone's shoulder beside them, relaxed and friendly posture. They are alone — arm resting on empty air.",
+      enR: "A person walking in profile, one shoulder slightly lowered as if someone's arm is resting on it, a natural comfortable smile, relaxed stride. They are alone — nothing visible on their shoulder.",
+      tag: "肩並肩"
+    },
+    {
+      label: "捏臉頰 ↔ 被捏臉嘟嘴",
+      desc: "左：拇指與食指輕捏成捏臉的手形，往前伸／右：臉頰微被推擠，嘟起嘴巴",
+      iconL: "🤏", iconR: "🐡",
+      nameL: "捏臉者", nameR: "被捏臉",
+      enL: "A person with one hand raised, thumb and index finger gently pinched together as if squeezing someone's cheek, expression delighted and teasing, leaning slightly forward. They are alone — fingers pinching empty air.",
+      enR: "A person with cheeks slightly puffed and lips pouty as if their cheek is being squeezed, eyes looking slightly to the side with a mix of annoyance and amusement. They are alone — nothing touching their face.",
+      tag: "捏臉可愛"
+    },
+  ],
+  "🎭 戲劇張力": [
+    {
+      label: "擋在前方保護 ↔ 躲在背後",
+      desc: "左：雙臂張開擋在前，像護住身後的人／右：身體微縮，像躲在人背後探頭",
+      iconL: "🛡️", iconR: "👀",
+      nameL: "保護者", nameR: "被保護者",
+      enL: "A person standing with both arms spread wide open to the sides, body squarely facing forward, expression fierce and protective as if shielding someone behind them. They are alone — nothing behind them visible.",
+      enR: "A person crouching very slightly, peeking forward with just their head and eyes visible over an imaginary shoulder, expression nervous but curious. They are alone — nothing in front of them.",
+      tag: "保護躲避"
+    },
+    {
+      label: "轉身離去 ↔ 伸手挽留",
+      desc: "左：側背對，一腳已邁步，回頭角度若有所思／右：一手向前伸出，表情不捨挽留",
+      iconL: "🚶", iconR: "🫸",
+      nameL: "離去者", nameR: "挽留者",
+      enL: "A person mid-stride walking away, body in three-quarter back view, one foot stepped forward, head turning very slightly back over shoulder as if hesitating. Expression conflicted. They are alone.",
+      enR: "A person with one arm outstretched forward, hand open and reaching as if trying to stop someone from leaving, expression urgent and emotional, body leaning forward. They are alone — reaching toward nothing visible.",
+      tag: "離別挽留"
+    },
+    {
+      label: "單膝跪地告白 ↔ 捂嘴驚喜",
+      desc: "左：單膝跪地，雙手向前捧出（像捧戒指盒）／右：雙手捂嘴，眼眶泛紅驚喜",
+      iconL: "💍", iconR: "🥹",
+      nameL: "告白者", nameR: "被告白",
+      enL: "A person down on one knee, the other knee raised, both hands extended forward cupped together as if presenting a small box or ring, expression earnest and nervous. They are alone — hands holding nothing visible.",
+      enR: "A person standing with both hands pressed over their mouth, eyes glistening with emotion, eyebrows raised in joyful disbelief, body trembling slightly with happy surprise. They are alone.",
+      tag: "求婚告白"
+    },
+    {
+      label: "背對哭泣隱藏 ↔ 正面偽裝微笑",
+      desc: "左：背對，肩膀顫抖，手遮臉／右：正面，強擠笑容但眼神落寞",
+      iconL: "😔", iconR: "🙂",
+      nameL: "背對哭泣", nameR: "偽裝微笑",
+      enL: "A person with their back fully to the viewer, shoulders slightly hunched and trembling, one hand raised to their face as if wiping tears, the other hanging limply. They are alone.",
+      enR: "A person facing forward with a smile that doesn't reach their eyes, gaze slightly distant and hollow, posture stiff and forced, expression masking sadness. They are alone.",
+      tag: "悲傷對比"
+    },
+    {
+      label: "推門衝入 ↔ 轉身嚇到",
+      desc: "左：身體前衝，一手向前推門姿勢，表情急切／右：猛然轉身，身體後退，表情嚇一跳",
+      iconL: "🚪", iconR: "😨",
+      nameL: "衝入者", nameR: "被嚇到",
+      enL: "A person lunging forward urgently, one arm extended pushing forward as if bursting through a door, expression determined and breathless. They are alone.",
+      enR: "A person caught mid-turn, body startled backward, one hand flying up to their chest in fright, mouth open, eyes wide with shock. They are alone.",
+      tag: "衝入驚嚇"
+    },
+  ],
+  "🤜 武打 / 格鬥": [
+    {
+      label: "出拳 ↔ 格擋",
+      desc: "左：右拳向前打出，身體旋轉發力／右：前臂交叉抬起擋拳，側身防禦",
+      iconL: "🥊", iconR: "🛡️",
+      nameL: "出拳者", nameR: "格擋者",
+      enL: "A person in a fighting stance throwing a powerful straight punch with right fist, body rotated, weight shifted to front foot, other hand guarding chin. Expression intense. They are alone — punching empty air.",
+      enR: "A person in a defensive stance, forearms crossed and raised to block an incoming strike, body turned sideways, knees bent, expression focused. They are alone — blocking nothing visible.",
+      tag: "攻防對決"
+    },
+    {
+      label: "側踢 ↔ 閃躲",
+      desc: "左：身體側轉，單腳側踢踢出／右：身體大幅度側傾閃開，重心壓低",
+      iconL: "🦵", iconR: "💨",
+      nameL: "踢出者", nameR: "閃躲者",
+      enL: "A person executing a powerful side kick, body turned sideways, one leg extended fully to the side at hip height, arms balanced, expression fierce. They are alone.",
+      enR: "A person dodging dramatically to the side, body leaning far to one side, one hand touching the ground for balance, head ducked low, expression alert. They are alone.",
+      tag: "踢擊閃躲"
+    },
+    {
+      label: "背後偷襲 ↔ 察覺回頭",
+      desc: "左：躡手躡腳，彎腰潛行，手臂抬起準備／右：猛然回頭，眼神銳利警覺",
+      iconL: "🥷", iconR: "👁️",
+      nameL: "偷襲者", nameR: "察覺者",
+      enL: "A person sneaking in a crouched position, moving stealthily with one arm raised ready to strike, expression sly and focused, tiptoeing forward. They are alone.",
+      enR: "A person whipping their head around sharply, eyes wide and alert, body already beginning to turn in reaction, expression fierce and ready. They are alone.",
+      tag: "偷襲察覺"
+    },
+  ],
+  "🌟 特殊姿態": [
+    {
+      label: "展示肌肉 ↔ 摸肌肉驚嘆",
+      desc: "左：雙臂彎曲秀二頭肌，得意表情／右：手伸向前方，像摸到肌肉，表情驚嘆",
+      iconL: "💪", iconR: "😮",
+      nameL: "秀肌肉", nameR: "驚嘆者",
+      enL: "A person flexing both arms in a classic double bicep pose, fists raised, muscles tensed, expression proud and confident. They are alone.",
+      enR: "A person reaching one hand forward with fingers gently curled as if touching and squeezing something firm, mouth slightly open in an impressed expression, eyebrows raised. They are alone — hand touching nothing visible.",
+      tag: "秀肌肉"
+    },
+    {
+      label: "指著對方笑 ↔ 不好意思摸頭",
+      desc: "左：手指向前，咧嘴大笑揶揄／右：一手摸後腦勺，不好意思地笑",
+      iconL: "😂", iconR: "😅",
+      nameL: "揶揄者", nameR: "不好意思",
+      enL: "A person pointing forward with index finger, laughing openly with a wide grin, body shaking slightly with amusement, expression playfully teasing. They are alone — pointing at nothing visible.",
+      enR: "A person raising one hand to scratch the back of their head sheepishly, looking away with an embarrassed awkward smile. They are alone.",
+      tag: "揶揄害羞"
+    },
+    {
+      label: "耳語靠近 ↔ 側耳傾聽",
+      desc: "左：側身前傾，嘴靠近，像在耳邊說悄悄話／右：側身，一手輕托耳朵旁，表情專注傾聽",
+      iconL: "🤫", iconR: "👂",
+      nameL: "說悄悄話", nameR: "傾聽者",
+      enL: "A person leaning their head to one side and forward, lips close together as if whispering into someone's ear, one hand slightly raised near their mouth, expression secretive and intimate. They are alone — lips near nothing visible.",
+      enR: "A person with head tilted to one side, hand cupped lightly near their ear, eyes focused and attentive, leaning in slightly to hear better. They are alone.",
+      tag: "耳語秘密"
+    },
+    {
+      label: "高五擊掌準備 ↔ 迎接擊掌",
+      desc: "左：手臂高舉，掌心向前等待高五／右：手臂高舉，掌心向前衝過去擊掌",
+      iconL: "🙋", iconR: "🙌",
+      nameL: "發起高五", nameR: "回應高五",
+      enL: "A person with one arm raised high above their head, palm flat and open facing outward, waiting with an excited grin for a high five. They are alone — palm facing empty air.",
+      enR: "A person with arm raised enthusiastically, palm open and swinging forward to meet a high five, leaning in with energy and a big smile. They are alone — palm meeting nothing visible.",
+      tag: "擊掌慶祝"
+    },
+    {
+      label: "倚門等待 ↔ 遠遠奔來",
+      desc: "左：側身靠著想像的門框，手臂倚上，悠閒等待／右：身體前傾全力奔跑，表情雀躍",
+      iconL: "🚪", iconR: "🏃",
+      nameL: "等待者", nameR: "奔來者",
+      enL: "A person leaning sideways against an invisible doorframe, one arm resting above their head against the frame, body relaxed and casual, expression patient and slightly expectant. They are alone.",
+      enR: "A person running at full speed toward the viewer, body leaning forward, arms pumping, face lit up with joy and excitement. They are alone.",
+      tag: "等待奔來"
+    },
+  ],
+
+  "🛏️ 躺著的動作": [
+    {
+      label: "仰躺放空 ↔ 俯身看向對方",
+      desc: "左：仰躺，雙臂自然展開，望向天花板放空／右：俯身向前，雙手撐地，低頭凝視下方",
+      iconL: "😴", iconR: "🔍",
+      nameL: "仰躺者", nameR: "俯視者",
+      enL: "A person lying flat on their back on the ground, arms resting loosely at their sides or slightly spread, eyes open gazing upward at the ceiling, expression calm and drifting. Full body visible. They are alone.",
+      enR: "A person leaning their upper body forward and downward, both hands planted on the ground in front, head tilted down as if looking at someone lying below them, expression gentle and attentive. They are alone — looking at nothing visible.",
+      tag: "躺與俯視"
+    },
+    {
+      label: "側躺捲曲 ↔ 坐在旁邊守護",
+      desc: "左：側躺身體微捲，眼微閉休息／右：坐在地上，膝蓋彎起，側頭靜靜陪伴",
+      iconL: "🌙", iconR: "🕯️",
+      nameL: "側躺休息", nameR: "坐守陪伴",
+      enL: "A person lying on their side, body gently curled, knees slightly bent, one arm tucked under their head as a pillow, eyes softly closed, expression peaceful. Full body visible. They are alone.",
+      enR: "A person sitting on the ground beside empty space, knees drawn up, arms resting on knees, head tilted slightly to one side as if quietly watching over someone sleeping nearby, expression tender and protective. They are alone.",
+      tag: "守護陪伴"
+    },
+    {
+      label: "仰躺伸手向上 ↔ 蹲下伸手向下",
+      desc: "左：仰躺，一手向上伸出渴望／右：蹲低，一手向下伸出回應",
+      iconL: "🙋", iconR: "🫳",
+      nameL: "伸手渴望", nameR: "伸手回應",
+      enL: "A person lying on their back, one arm raised straight up toward the sky, fingers slightly open and reaching upward with a yearning expression, as if trying to grasp something above. They are alone — hand reaching empty air.",
+      enR: "A person crouching or kneeling low, one arm extending downward with open palm, fingers reaching toward the ground as if offering a hand to someone below, expression warm and reassuring. They are alone — hand reaching toward nothing visible.",
+      tag: "伸手呼應"
+    },
+    {
+      label: "趴地抬頭 ↔ 站立低頭俯看",
+      desc: "左：趴在地上，雙手撐起上半身，仰頭往上看／右：站立，低頭俯視下方",
+      iconL: "🐍", iconR: "🧍",
+      nameL: "趴地抬頭", nameR: "站立俯視",
+      enL: "A person lying face down, both palms flat on the ground pushing their upper body up, head tilted back looking upward with a hopeful or searching expression. Full body visible. They are alone.",
+      enR: "A person standing upright, head bowed forward and down, looking toward the ground with a soft or contemplative expression, hands relaxed at sides. They are alone.",
+      tag: "高低視角"
+    },
+    {
+      label: "仰躺閉眼 ↔ 輕撫額頭姿勢",
+      desc: "左：仰躺，雙眼輕閉，表情平靜放鬆／右：一手微抬，掌心朝下，如輕撫對方額頭",
+      iconL: "😌", iconR: "🖐️",
+      nameL: "閉眼仰躺", nameR: "輕撫額頭",
+      enL: "A person lying on their back with eyes gently closed, face completely relaxed and peaceful, arms resting softly at their sides, expression of total calm. Full body visible. They are alone.",
+      enR: "A person with one arm raised, palm facing downward at forehead height, fingers relaxed and slightly curved as if tenderly stroking someone's forehead. Expression full of quiet love and care. They are alone — hand hovering over nothing visible.",
+      tag: "輕撫溫柔"
+    },
+    {
+      label: "側躺對視 ↔ 側躺對視（鏡像）",
+      desc: "兩人各自側躺，臉朝向對方，像隔著距離對望",
+      iconL: "👁️", iconR: "👁️",
+      nameL: "左側臥對望", nameR: "右側臥對望",
+      enL: "A person lying on their right side, body stretched out horizontally, head resting on their right arm, eyes open looking directly to the right with a soft intimate gaze, slight smile. Full body visible. They are alone.",
+      enR: "A person lying on their left side, body stretched out horizontally, head resting on their left arm, eyes open looking directly to the left with a soft intimate gaze, slight smile. Full body visible. They are alone. Mirrored pose of the left panel.",
+      tag: "對望側臥"
+    },
+  ],
+  "🌌 跨時空觸碰": [
+    {
+      label: "隔著玻璃貼手 ↔ 另一側貼手回應",
+      desc: "左：一手貼上想像中的玻璃，眼神深情／右：另一側同樣貼手，隔著空氣呼應",
+      iconL: "🪟", iconR: "🫲",
+      nameL: "貼玻璃者A", nameR: "貼玻璃者B",
+      enL: "A person standing close with one palm pressed flat against an invisible glass surface directly in front of them, forehead or face slightly leaning toward it, eyes closed or gazing through with deep longing. They are alone — pressing against invisible glass.",
+      enR: "A person on the other side, one palm pressed flat against the same invisible surface, face close and yearning, as if their hand almost touches the hand on the other side. They are alone — pressing against invisible glass.",
+      tag: "隔空相觸"
+    },
+    {
+      label: "觸摸空氣中的臉 ↔ 被觸碰的感應",
+      desc: "左：手緩緩抬起，手掌微彎，如捧著看不見的臉／右：臉微傾，眼微閉，感受不存在的觸碰",
+      iconL: "👻", iconR: "🫦",
+      nameL: "觸碰虛空", nameR: "感受觸碰",
+      enL: "A person standing with one hand gently raised, palm curved inward as if cradling an invisible face, fingers soft and spread slightly, expression full of tender grief and love, as if touching someone who is no longer there. They are alone — hand holding empty air.",
+      enR: "A person with face tilted slightly into empty space, eyes gently closed, cheek leaning into an invisible touch, expression bittersweet and deeply moved — feeling a presence that isn't physically there. They are alone — nothing visible touching their face.",
+      tag: "觸碰虛空"
+    },
+    {
+      label: "回頭看消失的身影 ↔ 漸漸透明的離去",
+      desc: "左：轉身回頭，手微伸向前方空白，眼神不捨／右：側身行走，身體姿態如逐漸消逝",
+      iconL: "🔮", iconR: "👣",
+      nameL: "回望不捨", nameR: "漸漸消逝",
+      enL: "A person turning their upper body to look back, one arm slightly extended forward into empty space, expression filled with longing and loss, as if watching someone disappear. They are alone — reaching toward nothing.",
+      enR: "A person walking away in profile, head slightly bowed, posture quiet and fading, as if stepping into another time or place — their presence feels ephemeral and ghostlike. They are alone.",
+      tag: "消逝身影"
+    },
+    {
+      label: "撫摸照片或空氣中的輪廓 ↔ 過去的自己站在原地",
+      desc: "左：一手輕描空中的輪廓，眼神緬懷思念／右：站立正面，平靜如昔，如記憶中的樣子",
+      iconL: "🖼️", iconR: "🕊️",
+      nameL: "思念描摸", nameR: "記憶中的人",
+      enL: "A person with one hand raised, fingers lightly tracing the outline of an invisible shape in the air at portrait height, expression nostalgic and deeply emotional, eyes soft with memory. They are alone — fingers tracing empty air.",
+      enR: "A person standing simply and quietly, facing forward with a calm and timeless expression, posture still and peaceful as if existing only in memory or a photograph. They are alone.",
+      tag: "思念輪廓"
+    },
+    {
+      label: "隔著時間擁抱 ↔ 同樣姿勢的空抱",
+      desc: "左右兩人各自做出擁抱的姿勢，懷裡什麼都沒有，卻像在擁抱同一個人",
+      iconL: "🤗", iconR: "🤗",
+      nameL: "空中擁抱A", nameR: "空中擁抱B",
+      enL: "A person with both arms wrapped around empty air in front of them, eyes closed, cheek pressed gently against nothing, body language expressing a deep and genuine embrace — holding someone invisible. Expression peaceful and full of love. They are alone.",
+      enR: "A person with both arms wrapped around empty air, the same gesture from a slightly different angle or opposite direction, eyes closed, body completely surrendered into the phantom hug. Expression equally tender. They are alone.",
+      tag: "跨時空擁抱"
+    },
+    {
+      label: "伸手穿越鏡子 ↔ 鏡中手伸出回應",
+      desc: "左：一手向前伸入想像中的鏡面，手腕消失感／右：一手從鏡面伸出，如鏡中的另一個自己",
+      iconL: "🪞", iconR: "✋",
+      nameL: "穿越鏡面", nameR: "鏡中回應",
+      enL: "A person standing close to an invisible mirror surface, one arm plunging forward through it as if passing through glass, expression awed and determined, body slightly leaning into the invisible threshold. They are alone.",
+      enR: "A person with one arm extended forward toward the viewer as if emerging from a mirror surface, expression calm and mysterious, the rest of their body partially as if still within the mirror. They are alone.",
+      tag: "穿越鏡面"
+    },
+  ],
+
+  "🌸 唯美感對應動作": [
+    {
+      label: "仰頭望天 ↔ 低頭沉思",
+      desc: "左：頭微仰，眼神空靈望向天空／右：頭微低，眼神向下沉思",
+      iconL: "🌙", iconR: "🌿",
+      nameL: "仰望者", nameR: "沉思者",
+      enL: "A person standing still, head tilted gently upward, eyes half-closed gazing softly toward the sky, lips slightly parted, expression ethereal and distant, body relaxed, arms at sides. Full body visible. They are alone.",
+      enR: "A person standing still, head bowed gently downward, eyes cast softly downward in quiet contemplation, a subtle melancholy expression, body relaxed, arms at sides. Full body visible. They are alone.",
+      tag: "天地呼應"
+    },
+    {
+      label: "旋轉飛揚 ↔ 靜止凝視",
+      desc: "左：身體緩緩旋轉，衣裙飛揚，表情自由／右：靜靜站立側身，望向左方，神情柔和",
+      iconL: "🌀", iconR: "👁️",
+      nameL: "旋轉飛揚", nameR: "靜止凝視",
+      enL: "A person mid-spin, body rotating gracefully, clothing and hair flowing outward from the motion, arms gently spread, eyes closed with a free joyful expression. Full body visible. They are alone.",
+      enR: "A person standing completely still, body in three-quarter profile facing LEFT, gaze soft and steady toward the left of frame, arms loose at sides, expression calm and warm. Full body visible. They are alone.",
+      tag: "動靜對比"
+    },
+    {
+      label: "側身張臂迎風 ↔ 背對微揚頭",
+      desc: "左：側身雙臂輕展如翼，迎著風的姿態／右：背對鏡頭，頭微揚，髮絲飄動",
+      iconL: "🕊️", iconR: "🌬️",
+      nameL: "迎風展臂", nameR: "背身揚頭",
+      enL: "A person standing in side profile, both arms spread wide slightly upward as if embracing wind, head tilted back, eyes closed, hair and clothes flowing, expression blissful. Full body visible. They are alone.",
+      enR: "A person standing with their back fully facing the viewer, head tilted slightly upward, hair lifted gently as if in a breeze, posture relaxed and free, arms loose at sides. Full body visible. They are alone.",
+      tag: "風中姿態"
+    },
+    {
+      label: "蹲下撫地 ↔ 站立俯視",
+      desc: "左：優雅蹲下，手輕觸地面，眼神溫柔向下／右：筆直站立，低頭俯視，眼神柔和",
+      iconL: "🌱", iconR: "🌾",
+      nameL: "蹲觸大地", nameR: "俯視守護",
+      enL: "A person crouching down gracefully, one hand resting softly on the ground fingers spread, head bowed with a tender expression, body balanced and elegant. Full body visible. They are alone.",
+      enR: "A person standing upright, head bowed gently looking downward toward the left panel, expression soft and protective, arms loosely at sides. Full body visible. They are alone.",
+      tag: "高低呼應"
+    },
+    {
+      label: "坐地抱膝 ↔ 站立倚靠遠眺",
+      desc: "左：坐在地上抱膝，側臉憂鬱柔美／右：站立背靠想像中的牆，眼神遠眺",
+      iconL: "🫧", iconR: "🌫️",
+      nameL: "抱膝靜坐", nameR: "倚靠遠眺",
+      enL: "A person sitting on the ground, knees drawn up to chest, arms wrapped around legs, head resting sideways on knees, expression dreamy and melancholy. Full body visible. They are alone.",
+      enR: "A person leaning their back against an invisible surface, one leg slightly bent, arms loosely at sides, head turned to gaze into the distance, expression wistful. Full body visible. They are alone.",
+      tag: "靜謐孤美"
+    },
+    {
+      label: "單手撫心 ↔ 雙手交疊胸前",
+      desc: "左：一手輕放心口，眼微閉，神情感動／右：雙手交疊胸前，頭微低，神情虔誠溫柔",
+      iconL: "💫", iconR: "🤍",
+      nameL: "撫心感動", nameR: "交疊祈願",
+      enL: "A person standing, one hand placed softly over their heart, eyes gently closed, face expressing quiet emotion and warmth, body still and composed. Full body visible. They are alone.",
+      enR: "A person standing, both hands layered gently over their chest, head slightly bowed, expression serene and sincere, a faint peaceful smile. Full body visible. They are alone.",
+      tag: "心意相通"
+    },
+    {
+      label: "張臂仰躺草地 ↔ 側坐望遠",
+      desc: "左：躺在地上雙臂大字展開，仰望天空，表情放空／右：側身坐地，單手撐地，望向遠方",
+      iconL: "☁️", iconR: "🌤️",
+      nameL: "大字仰躺", nameR: "側坐望遠",
+      enL: "A person lying flat on their back on the ground, both arms spread wide to the sides in a relaxed open posture, legs extended, face turned upward eyes half-open in peaceful daydream. Full body visible. They are alone.",
+      enR: "A person sitting sideways on the ground, one arm propped on the ground beside them, legs folded to one side, face turned to gaze softly into the distance, expression calm and introspective. Full body visible. They are alone.",
+      tag: "地面唯美"
+    },
+  ],
+
+  "📸 情人拍照對應動作": [
+    {
+      label: "望向鏡頭微笑 ↔ 側臉望向對方",
+      desc: "左：直視前方鏡頭，自然微笑／右：側臉望向左方，眼神溫柔帶笑",
+      iconL: "😊", iconR: "🥰",
+      nameL: "望鏡微笑", nameR: "側望對方",
+      enL: "A person looking directly forward toward the camera with a natural relaxed smile, posture confident and comfortable, arms at sides. Full body visible. They are alone.",
+      enR: "A person in three-quarter profile, face and gaze turned warmly toward the LEFT of the frame, soft affectionate smile, body relaxed and natural. Full body visible. They are alone.",
+      tag: "情侶日拍"
+    },
+    {
+      label: "回眸一笑 ↔ 正面大笑",
+      desc: "左：行走中回頭，嘴角揚起最美的回眸／右：正對鏡頭開心大笑，表情奔放",
+      iconL: "✨", iconR: "😄",
+      nameL: "回眸微笑", nameR: "正面大笑",
+      enL: "A person in motion as if walking away, upper body turned back to look over their shoulder with a radiant natural smile, hair mid-movement, body caught in a graceful turn. Full body visible. They are alone.",
+      enR: "A person facing directly forward, laughing openly and genuinely, head slightly tilted, eyes crinkled with joy, body language relaxed and carefree. Full body visible. They are alone.",
+      tag: "回眸配正面"
+    },
+    {
+      label: "各自望向遠方（背對背構圖）",
+      desc: "左：站立望向左遠方／右：站立望向右遠方，形成背對背的意境",
+      iconL: "🌅", iconR: "🌄",
+      nameL: "望左遠方", nameR: "望右遠方",
+      enL: "A person standing upright, body and gaze directed toward the FAR LEFT of the frame, chin slightly raised, expression calm and content, arms relaxed at sides. Full body visible. They are alone.",
+      enR: "A person standing upright, body and gaze directed toward the FAR RIGHT of the frame, chin slightly raised, expression calm and content, arms relaxed at sides. Full body visible. They are alone.",
+      tag: "背對背遠眺"
+    },
+    {
+      label: "單膝蹲下比YA ↔ 站立彎腰比YA",
+      desc: "左：單膝跪地比YA，活潑笑容／右：站立向前彎腰，比YA朝向左側，開心配合",
+      iconL: "✌️", iconR: "😁",
+      nameL: "跪地比YA", nameR: "彎腰比YA",
+      enL: "A person down on one knee, one hand on their knee, the other hand raised making a V peace sign toward the camera, bright cheerful grin. Full body visible. They are alone.",
+      enR: "A person bending forward at the waist toward the LEFT of the frame, one hand raised making a V peace sign, laughing with mouth open, playful expression. Full body visible. They are alone.",
+      tag: "活潑比YA"
+    },
+    {
+      label: "捂嘴偷笑 ↔ 張臂誇張大笑",
+      desc: "左：雙手捂嘴，眼睛彎彎，忍不住笑出來／右：雙臂張開誇張反應，仰頭大笑",
+      iconL: "🤭", iconR: "🤣",
+      nameL: "捂嘴偷笑", nameR: "誇張大笑",
+      enL: "A person standing, both hands raised to cover their mouth, eyes crinkled into happy crescents, shoulders shaking as if holding back laughter, expression delighted. Full body visible. They are alone.",
+      enR: "A person with both arms thrown wide open, head tilted back in full open laughter, body slightly leaning back, expression completely uninhibited and joyful. Full body visible. They are alone.",
+      tag: "笑到不行"
+    },
+    {
+      label: "邊走回頭 ↔ 站立目送微笑",
+      desc: "左：走路中轉頭回望，自然行進姿態／右：站立目送，嘴角帶笑，眼神依依",
+      iconL: "🚶", iconR: "🫂",
+      nameL: "邊走回頭", nameR: "目送微笑",
+      enL: "A person in mid-stride walking toward the RIGHT of the frame, head turned to look back over their left shoulder, natural walking posture, expression warm and reluctant to leave. Full body visible. They are alone.",
+      enR: "A person standing still, gaze directed toward the RIGHT of the frame as if watching someone walk away, soft bittersweet smile, arms loose at sides. Full body visible. They are alone.",
+      tag: "離別目送"
+    },
+    {
+      label: "坐地撐手後仰大笑 ↔ 蹲下抱膝側看",
+      desc: "左：坐在地上雙手撐地後仰，仰頭燦笑／右：蹲下抱膝，側頭微笑看向左方",
+      iconL: "😆", iconR: "🙃",
+      nameL: "撐地後仰", nameR: "抱膝側看",
+      enL: "A person sitting on the ground, both hands planted behind them, body leaning back, face tilted up to the sky with a wide carefree laugh, legs stretched out. Full body visible. They are alone.",
+      enR: "A person crouching down, arms wrapped around their knees, head tilted sideways, looking toward the LEFT of frame with a soft playful smile. Full body visible. They are alone.",
+      tag: "地面造型"
+    },
+    {
+      label: "跳起雙手展開 ↔ 原地跳起歡呼",
+      desc: "左：跳起雙手向兩側大展開，表情自由奔放／右：跳起雙拳高舉歡呼，表情爆發",
+      iconL: "🦋", iconR: "🎊",
+      nameL: "展翅跳躍", nameR: "歡呼跳躍",
+      enL: "A person leaping into the air, both arms spread wide to the sides like wings, legs naturally bent from the jump, head slightly back, expression free and radiant. Full body visible. They are alone.",
+      enR: "A person jumping into the air, both fists raised high above their head, mouth open in a triumphant cheer, body full of energy. Full body visible. They are alone.",
+      tag: "跳躍歡呼"
+    },
+  ],
+
+  "😤 仇人對應動作": [
+    {
+      label: "怒指對方 ↔ 冷眼回視",
+      desc: "左：抬手怒指向右，滿臉憤怒／右：雙手環胸，冷眼斜視左方，不屑一顧",
+      iconL: "😡", iconR: "😒",
+      nameL: "怒指指責", nameR: "冷眼蔑視",
+      enL: "A person standing, one arm raised with index finger pointing aggressively toward the RIGHT of the frame, jaw clenched, brow furrowed in fury, body tense and leaning forward with anger. Full body visible. They are alone.",
+      enR: "A person standing with both arms folded across the chest, head slightly tilted, eyes narrowed into a cold contemptuous sideways glare toward the LEFT of the frame, expression icy and unmoved. Full body visible. They are alone.",
+      tag: "憤怒對峙"
+    },
+    {
+      label: "轉身背對 ↔ 伸手挽留被拒",
+      desc: "左：決然轉身背對，拒絕回頭／右：伸手向左，表情痛苦被無視",
+      iconL: "🚫", iconR: "😩",
+      nameL: "決然轉身", nameR: "伸手被拒",
+      enL: "A person with their back fully turned toward the viewer, standing rigid and resolute, arms at sides tightly, head held straight — refusing to look back. Full body visible. They are alone.",
+      enR: "A person reaching one arm out toward the LEFT of the frame, body slightly lurching forward, face contorted with pain and desperation as if being ignored. Full body visible. They are alone.",
+      tag: "決裂轉身"
+    },
+    {
+      label: "拍桌怒站 ↔ 起身對峙",
+      desc: "左：雙手按住虛空猛拍，上身前傾怒視／右：猛然起身站直，雙拳握緊回瞪",
+      iconL: "🤜", iconR: "😤",
+      nameL: "拍桌怒視", nameR: "起身對峙",
+      enL: "A person leaning forcefully forward, both palms slamming down onto an invisible surface, upper body aggressively tilted toward the RIGHT of frame, teeth gritted, eyes blazing with fury. Full body visible. They are alone.",
+      enR: "A person jolting upright from a seated position, both fists clenched at sides, chest puffed, glaring intensely toward the LEFT of frame, jaw set in defiance. Full body visible. They are alone.",
+      tag: "正面衝突"
+    },
+    {
+      label: "壓低聲音威脅靠近 ↔ 後退一步不示弱",
+      desc: "左：身體前傾壓低，眼神狠厲逼近右側／右：後退一步但挺胸不退縮，眼神回瞪",
+      iconL: "😈", iconR: "😠",
+      nameL: "逼近威脅", nameR: "後退不屈",
+      enL: "A person leaning their upper body menacingly toward the RIGHT, head slightly lowered, eyes cold and threatening, one foot stepping forward, hands loosely at sides ready to act. Full body visible. They are alone.",
+      enR: "A person stepping one foot back but keeping their chest high and chin up, eyes locked in a fierce stare toward the LEFT, fists slightly clenched, refusing to be intimidated. Full body visible. They are alone.",
+      tag: "威脅不屈"
+    },
+    {
+      label: "甩袖離去 ↔ 攔住去路張臂",
+      desc: "左：憤然甩袖大步走向左側離去／右：張開雙臂擋住去路，面向左方",
+      iconL: "💢", iconR: "🙅",
+      nameL: "甩袖離去", nameR: "攔路阻擋",
+      enL: "A person striding powerfully toward the LEFT of the frame, arm swinging with a forceful dismissive motion, face turned away, expression bitter and done. Full body visible. They are alone.",
+      enR: "A person facing LEFT with both arms spread wide to block passage, feet planted apart, expression firm and unyielding, blocking an invisible path. Full body visible. They are alone.",
+      tag: "攔截離去"
+    },
+    {
+      label: "低頭沉默承受 ↔ 冷然轉身",
+      desc: "左：低頭站立，雙肩微塌，默默承受責難／右：冷漠側身轉離，不願多看一眼",
+      iconL: "😶", iconR: "🥶",
+      nameL: "低頭承受", nameR: "冷然轉離",
+      enL: "A person standing with head bowed, shoulders slightly dropped, body language submissive and heavy, absorbing blame in silence, hands loose at sides. Full body visible. They are alone.",
+      enR: "A person turning their body to the side, chin lifted coolly, eyes averted away from the LEFT of frame, expression glacial and detached. Full body visible. They are alone.",
+      tag: "冷戰沉默"
+    },
+    {
+      label: "扯領口質問 ↔ 被扯住掙扎",
+      desc: "左：手向右伸出握拳，做出抓人領口的動作，怒視／右：身體略向左被拉，雙手推開，表情慌張抗拒",
+      iconL: "👊", iconR: "😨",
+      nameL: "抓領口質問", nameR: "掙扎抗拒",
+      enL: "A person thrusting their right arm aggressively toward the RIGHT of the frame, hand clenched as if grabbing an invisible collar, body weight shifted forward, expression furious and demanding. Full body visible. They are alone.",
+      enR: "A person's body pulled slightly toward the LEFT, both hands raised pushing outward in resistance, face showing alarm and defiance, feet bracing against the invisible force. Full body visible. They are alone.",
+      tag: "激烈衝突"
+    },
+    {
+      label: "背靠背冷戰 ↔ （鏡像冷戰）",
+      desc: "左：站立，背對右側，雙臂環胸，冷漠不語／右：站立，背對左側，同樣冷漠環胸",
+      iconL: "🧊", iconR: "🧊",
+      nameL: "左側冷戰", nameR: "右側冷戰",
+      enL: "A person standing rigidly with their back facing the RIGHT of frame, arms firmly crossed, jaw set, expression stony and cold — completely shut off. Full body visible. They are alone.",
+      enR: "A person standing rigidly with their back facing the LEFT of frame, arms firmly crossed, jaw set, expression stony and cold — completely shut off. Full body visible. They are alone.",
+      tag: "背對冷戰"
+    },
+  ],
+
+  "⚔️ 江湖俠客對應動作": [
+    {
+      label: "拔劍指天 ↔ 持劍側身備戰",
+      desc: "左：單手拔劍高舉指天，豪氣萬千／右：側身持劍平舉，蓄勢待發",
+      iconL: "⚔️", iconR: "🗡️",
+      nameL: "拔劍指天", nameR: "側身備戰",
+      enL: "A person standing tall, one arm raised high with hand gripping an invisible sword pointing straight up toward the sky, chest out, head held high, expression fierce and heroic. Full body visible. They are alone.",
+      enR: "A person in a side-on combat stance, feet apart, both hands gripping an invisible sword held horizontally at chest height, eyes sharp and focused toward the LEFT, expression calm and ready. Full body visible. They are alone.",
+      tag: "江湖對決"
+    },
+    {
+      label: "單掌推出內力 ↔ 飛身後躍閃避",
+      desc: "左：馬步紮穩，單掌猛推向右輸出內力／右：騰空飛躍向後閃避，衣袂飛揚",
+      iconL: "🌊", iconR: "💨",
+      nameL: "掌推內力", nameR: "飛身閃避",
+      enL: "A person in a deep horse stance, one palm thrusting powerfully toward the RIGHT of the frame, other hand pulled back at the waist, body braced, expression commanding. Full body visible. They are alone.",
+      enR: "A person leaping backward into the air, body arched, clothing and hair flowing from the motion, arms spread for balance, expression alert and agile. Full body visible. They are alone.",
+      tag: "內力對招"
+    },
+    {
+      label: "抱拳拱手行禮 ↔ 回禮點頭",
+      desc: "左：雙手抱拳舉至胸前行江湖禮／右：雙手回禮抱拳，微微點頭致意",
+      iconL: "🙏", iconR: "🤝",
+      nameL: "抱拳行禮", nameR: "回禮點頭",
+      enL: "A person standing with both hands clasped together in a martial arts salute held at chest height, slight forward bow, expression respectful and dignified. Full body visible. They are alone.",
+      enR: "A person returning the martial salute with both hands clasped at chest, a slight nod of the head, expression composed and courteous. Full body visible. They are alone.",
+      tag: "江湖禮節"
+    },
+    {
+      label: "仗劍獨立遠眺 ↔ 背手負劍而立",
+      desc: "左：單手持劍點地，昂首遠眺左方，江湖孤客姿態／右：雙手背於身後，負劍而立，沉穩淡然",
+      iconL: "🏔️", iconR: "🌄",
+      nameL: "仗劍遠眺", nameR: "負劍而立",
+      enL: "A person standing with one hand resting on an invisible sword pointing downward, chin lifted gazing far into the LEFT distance, posture proud and solitary, the bearing of a lone wanderer. Full body visible. They are alone.",
+      enR: "A person standing with both hands clasped behind their back, spine straight, head slightly bowed or level, expression tranquil and composed — a sword invisible across their back. Full body visible. They are alone.",
+      tag: "俠客孤影"
+    },
+    {
+      label: "縱身騰空出招 ↔ 鐵馬金刀接招",
+      desc: "左：騰空躍起，單手揮出一擊，衣袂飛舞／右：馬步穩紮，雙臂格擋，氣沉丹田",
+      iconL: "🦅", iconR: "🛡️",
+      nameL: "騰空出招", nameR: "紮馬格擋",
+      enL: "A person launched high into the air, one arm swinging in a powerful strike toward the RIGHT, clothing dramatically flowing, face intense and focused, body fully airborne. Full body visible. They are alone.",
+      enR: "A person in a wide low horse stance, both arms raised and crossed in a defensive block, feet firmly planted, expression resolute and grounded. Full body visible. They are alone.",
+      tag: "攻守對招"
+    },
+    {
+      label: "輕功掠過側身 ↔ 轉身凝視來者",
+      desc: "左：輕功掠影，側身飛掠而過，衣帶飄逸／右：聞聲轉身，手按劍柄，目光如炬",
+      iconL: "💨", iconR: "👁️",
+      nameL: "輕功掠影", nameR: "轉身凝視",
+      enL: "A person in a swift side-on running pose as if using lightness kung fu, body sleek and low, clothing streaming behind, expression focused and fleet. Full body visible. They are alone.",
+      enR: "A person caught mid-turn, one hand reaching toward where an invisible sword hilt would be at the hip, eyes sharp and locked toward the LEFT, expression alert and piercing. Full body visible. They are alone.",
+      tag: "輕功身法"
+    },
+    {
+      label: "受傷單膝跪地 ↔ 俯身扶起姿勢",
+      desc: "左：受傷單膝跪地，單手撐地，仍昂首不屈／右：俯身向左，伸手欲扶，表情擔憂",
+      iconL: "🩸", iconR: "🤲",
+      nameL: "跪地不屈", nameR: "俯身相扶",
+      enL: "A person down on one knee, one hand pressed to the ground for support, other arm at their side, head raised defiantly despite injury, expression pained but unbroken. Full body visible. They are alone.",
+      enR: "A person leaning their upper body toward the LEFT, one arm extended downward and forward as if reaching to help someone up, expression filled with urgency and concern. Full body visible. They are alone.",
+      tag: "生死相扶"
+    },
+    {
+      label: "長嘯抒懷 ↔ 側坐撫膝沉思",
+      desc: "左：仰天長嘯，雙臂微展，豪情萬丈／右：盤坐或側坐，單手撫膝，低頭沉思江湖事",
+      iconL: "🌕", iconR: "🍃",
+      nameL: "仰天長嘯", nameR: "撫膝沉思",
+      enL: "A person standing with head thrown back facing the sky, mouth open in a silent roar or shout of passion, both arms slightly spread, posture exhilarated and wild. Full body visible. They are alone.",
+      enR: "A person sitting cross-legged or side-seated on the ground, one hand resting on their knee, head bowed in deep thought, expression contemplative and world-weary. Full body visible. They are alone.",
+      tag: "豪情與沉思"
+    },
+  ],
+
+  "👑 霸總對應動作": [
+    {
+      label: "靠牆冷眼俯視 ↔ 被逼近仰頭回視",
+      desc: "左：單手撐牆，身體微前傾，冷眼往下俯視右方／右：背靠牆，仰頭直視左方，不卑不亢",
+      iconL: "😏", iconR: "😤",
+      nameL: "壁咚俯視", nameR: "仰頭回視",
+      enL: "A person leaning with one hand pressed against an invisible wall, body angled slightly forward and downward, gaze cold and commanding directed toward the lower RIGHT of frame, expression arrogant and controlled. Full body visible. They are alone.",
+      enR: "A person with their back against an invisible wall, chin tilted upward defiantly, eyes locked in a steady fierce gaze toward the upper LEFT, expression proud and unyielding despite being cornered. Full body visible. They are alone.",
+      tag: "壁咚對峙"
+    },
+    {
+      label: "端坐交叉手指凝視 ↔ 站立匯報低頭",
+      desc: "左：端坐，雙手手指交叉置於面前，眼神銳利看向右方／右：站立微微低頭，雙手背後，姿態恭謹",
+      iconL: "🧐", iconR: "🤐",
+      nameL: "霸總凝視", nameR: "恭謹匯報",
+      enL: "A person seated, both hands interlocked fingers touching in front of their face, elbows resting on invisible surface, eyes sharp and calculating directed to the RIGHT, expression imperious. Full body visible. They are alone.",
+      enR: "A person standing upright with hands clasped behind their back, head slightly bowed, posture respectful and restrained, eyes cast slightly downward — the posture of someone reporting to authority. Full body visible. They are alone.",
+      tag: "上下權力"
+    },
+    {
+      label: "大步流星走來 ↔ 愣在原地",
+      desc: "左：大步向右走來，西裝筆挺，眼神鎖定前方目標，氣場全開／右：站在原地略顯慌亂，下意識後退半步",
+      iconL: "💼", iconR: "😳",
+      nameL: "氣場走來", nameR: "愣在原地",
+      enL: "A person striding powerfully toward the RIGHT of frame, body upright and commanding, one arm swinging naturally, chin slightly raised, gaze fixed ahead with intense focused energy. Full body visible. They are alone.",
+      enR: "A person caught standing still, body slightly recoiling backward with one foot stepping back, eyes wide and caught off-guard, expression flustered and surprised. Full body visible. They are alone.",
+      tag: "氣場壓制"
+    },
+    {
+      label: "轉身甩外套 ↔ 目不轉睛盯著",
+      desc: "左：轉身的瞬間，外套衣擺飛揚，側臉輪廓分明／右：站立目不轉睛，微微張嘴看向左方",
+      iconL: "🌬️", iconR: "😮",
+      nameL: "甩衣轉身", nameR: "目不轉睛",
+      enL: "A person mid-turn, body rotating with clothing dramatically sweeping outward, sharp side profile visible, hair or collar catching the air — a cinematic moment. Full body visible. They are alone.",
+      enR: "A person standing completely still, eyes wide and fixed intensely toward the LEFT of frame, mouth barely open, completely captivated expression, unable to look away. Full body visible. They are alone.",
+      tag: "回眸震撼"
+    },
+    {
+      label: "冷漠背身離去 ↔ 看著背影怔住",
+      desc: "左：背對一切大步離去，不留戀，衣擺帶風／右：站在原地，望著左側背影，怔在當場",
+      iconL: "🚪", iconR: "💔",
+      nameL: "冷漠離去", nameR: "怔望背影",
+      enL: "A person walking away toward the LEFT of frame, back fully facing the viewer, stride long and purposeful, posture cold and final — not looking back. Full body visible. They are alone.",
+      enR: "A person standing frozen, gaze fixed toward the LEFT of frame where someone has left, expression struck and hollow, one hand slightly raised as if to call out but stopping themselves. Full body visible. They are alone.",
+      tag: "離去怔望"
+    },
+    {
+      label: "俯身貼耳低語 ↔ 側耳臉紅",
+      desc: "左：身體前傾俯向右側，嘴靠近想像中的耳邊，眼神意味深長／右：側臉微紅，眼神飄向一側，耳朵微偏",
+      iconL: "🤫", iconR: "😶‍🌫️",
+      nameL: "俯身低語", nameR: "側耳臉紅",
+      enL: "A person leaning their upper body toward the RIGHT of frame, head angled downward as if whispering into an invisible ear close beside them, expression secretive and deliberate. Full body visible. They are alone.",
+      enR: "A person standing with head tilted slightly to the LEFT, cheek faintly flushed, eyes drifting sideways as if distracted, lips pressed together — the posture of someone hearing something unexpected. Full body visible. They are alone.",
+      tag: "耳邊低語"
+    },
+  ],
+
+  "🏮 古風宮廷對應動作": [
+    {
+      label: "斂衽萬福行禮 ↔ 撩袍回禮",
+      desc: "左：雙手交疊於腹前，微蹲行萬福禮，眼神低垂溫婉／右：單手撩起衣袍前擺，另一手置胸前，微微鞠躬",
+      iconL: "🌸", iconR: "🎋",
+      nameL: "萬福行禮", nameR: "撩袍回禮",
+      enL: "A person in a graceful curtsy-like bow, both hands folded together at the waist, knees slightly bent, eyes cast modestly downward, posture elegant and deferential. Full body visible. They are alone.",
+      enR: "A person with one hand holding aside an invisible garment hem, the other hand placed flat against their chest, upper body bowing slightly forward, expression composed and dignified. Full body visible. They are alone.",
+      tag: "宮廷禮儀"
+    },
+    {
+      label: "廣袖遮面側身 ↔ 凝眸對望",
+      desc: "左：一袖輕抬遮住半張臉，側身含羞帶嬌／右：正身而立，眼神穿過對方，深情凝視",
+      iconL: "🌺", iconR: "🫦",
+      nameL: "廣袖遮面", nameR: "深情凝眸",
+      enL: "A person in side profile, one arm raised with sleeve draped elegantly across the lower half of their face, eyes visible above the sleeve with a coy expression, posture delicate. Full body visible. They are alone.",
+      enR: "A person standing composed and upright, eyes gazing steadily and warmly toward the LEFT of frame with deep emotion, expression tender yet restrained in a courtly way. Full body visible. They are alone.",
+      tag: "含羞凝望"
+    },
+    {
+      label: "負手踱步沉吟 ↔ 靜立候命",
+      desc: "左：雙手負於身後，緩步踱行，眉頭微蹙若有所思／右：筆直靜立，雙手垂於身側，眼神恭謹等待",
+      iconL: "🤔", iconR: "🧎",
+      nameL: "負手沉吟", nameR: "靜立候命",
+      enL: "A person pacing slowly, both hands clasped behind their back, head slightly bowed in thought, brow gently furrowed, expression contemplative and weighty. Full body visible. They are alone.",
+      enR: "A person standing perfectly still and upright, hands at sides, eyes slightly lowered in a respectful waiting posture, expression calm and attentive. Full body visible. They are alone.",
+      tag: "君臣之間"
+    },
+    {
+      label: "拂袖轉身含怒 ↔ 跪地請罪",
+      desc: "左：猛地拂袖轉身，衣袖飛揚，側臉含怒，氣勢逼人／右：雙膝跪地，低頭伏身，姿態誠惶誠恐",
+      iconL: "😤", iconR: "🙇",
+      nameL: "拂袖含怒", nameR: "跪地請罪",
+      enL: "A person spinning sharply with one arm sweeping outward, sleeve dramatically fanning through the air, face turned to the side in suppressed fury, posture imperious. Full body visible. They are alone.",
+      enR: "A person kneeling on both knees, upper body folded forward in a deep prostration, forehead near the ground, arms placed submissively — the posture of begging forgiveness. Full body visible. They are alone.",
+      tag: "帝王盛怒"
+    },
+    {
+      label: "執扇半掩臉 ↔ 抬眼窺看",
+      desc: "左：手持扇子半遮臉，眉眼含情望向右方，古典嫵媚／右：微微側身，從眼角餘光偷偷望向左方",
+      iconL: "🪭", iconR: "👀",
+      nameL: "執扇遮面", nameR: "側目偷窺",
+      enL: "A person holding an invisible fan at face level, arm raised elegantly, half their face obscured, visible eye soft and flirtatious, posture refined and alluring. Full body visible. They are alone.",
+      enR: "A person standing in slight profile, head barely turned, eyes sliding carefully toward the LEFT of frame in a subtle stolen glance, expression guarded but curious. Full body visible. They are alone.",
+      tag: "扇後含情"
+    },
+    {
+      label: "仰天長歎 ↔ 轉身不忍直視",
+      desc: "左：頭微仰，雙眸輕閉，長歎一口氣，衣袖垂落／右：轉身背對，低頭，雙手握拳不忍看",
+      iconL: "😔", iconR: "😢",
+      nameL: "仰天長歎", nameR: "轉身不忍",
+      enL: "A person with head tilted back slightly, eyes gently closed, expression of quiet anguish and resignation, shoulders settling with a long exhaled breath. Full body visible. They are alone.",
+      enR: "A person turned away, back to the viewer, head bowed, both hands curled into loose fists at their sides, body language heavy with grief and the inability to witness. Full body visible. They are alone.",
+      tag: "心痛不忍"
+    },
+    {
+      label: "端茶奉上 ↔ 側身接茶",
+      desc: "左：雙手托捧虛空，做端茶奉上的姿勢，眼神恭敬溫柔／右：側身微伸雙手，做接茶姿勢，表情溫和",
+      iconL: "☕", iconR: "🫖",
+      nameL: "端茶奉上", nameR: "側身接茶",
+      enL: "A person standing with both hands raised and cupped together as if presenting an invisible tea cup, body slightly bowed forward in offering, expression respectful and gentle. Full body visible. They are alone.",
+      enR: "A person turned slightly to the side, both hands extended forward and cupped as if receiving something delicate, expression calm and appreciative. Full body visible. They are alone.",
+      tag: "奉茶禮儀"
+    },
+  ],
+
+  "🛹 現代街頭對應動作": [
+    {
+      label: "抱手靠牆耍酷 ↔ 蹲地仰頭回應",
+      desc: "左：背靠牆，雙手環胸，一腳踩牆，眼神漫不經心／右：蹲在地上，仰起頭看向左方，帶點笑意",
+      iconL: "😎", iconR: "😄",
+      nameL: "靠牆耍酷", nameR: "蹲地仰看",
+      enL: "A person leaning back against an invisible wall, arms folded across chest, one foot propped up behind them on the wall, gaze casual and unbothered, expression effortlessly cool. Full body visible. They are alone.",
+      enR: "A person crouched down low on the ground, head tilted upward looking toward the LEFT of frame, a relaxed grin on their face, elbows resting on knees. Full body visible. They are alone.",
+      tag: "街頭酷感"
+    },
+    {
+      label: "帽簷壓低走來 ↔ 抬眼認出",
+      desc: "左：低頭壓低帽簷大步走來，側臉若有所思／右：正抬起頭，眼神突然對上，微微一愣",
+      iconL: "🧢", iconR: "😯",
+      nameL: "低帽走來", nameR: "抬眼認出",
+      enL: "A person striding toward the RIGHT of frame, head slightly down as if their cap brim is lowered, hands in pockets or swinging naturally, posture casual but purposeful. Full body visible. They are alone.",
+      enR: "A person in the middle of lifting their head, caught in the instant of recognition, eyes slightly widened, mouth just opening, body momentarily frozen. Full body visible. They are alone.",
+      tag: "街頭偶遇"
+    },
+    {
+      label: "蹲地塗鴉姿勢 ↔ 站立俯身看",
+      desc: "左：蹲下，一手向前做塗鴉動作，側身專注投入／右：站立俯身，雙手撐膝，低頭看向左方，表情好奇",
+      iconL: "🎨", iconR: "🤩",
+      nameL: "蹲地塗鴉", nameR: "俯身圍觀",
+      enL: "A person crouched down, one arm extended forward at ground level in a writing or painting motion, body weight balanced, expression intensely focused on their work. Full body visible. They are alone.",
+      enR: "A person bending forward at the waist, hands resting on their knees, head angled downward looking toward the LEFT of frame with curious wide eyes. Full body visible. They are alone.",
+      tag: "街頭創作"
+    },
+    {
+      label: "跳起抓高處 ↔ 墊腳伸手",
+      desc: "左：起跳，單手向上抓住想像中的高處，表情爽快／右：墊起腳尖，單手向上伸去，略顯吃力",
+      iconL: "🤸", iconR: "🙋",
+      nameL: "跳抓高處", nameR: "墊腳伸手",
+      enL: "A person mid-jump, one arm stretched high above their head reaching upward, legs bent from the leap, expression triumphant and energetic. Full body visible. They are alone.",
+      enR: "A person up on their tiptoes, one arm raised and stretched upward, body slightly straining to reach higher, expression earnest and determined. Full body visible. They are alone.",
+      tag: "高低呼應"
+    },
+    {
+      label: "靠欄杆側身滑手機 ↔ 湊過來偷看",
+      desc: "左：側身靠著虛空欄杆，低頭看手機，表情專注放鬆／右：身體向左傾，脖子伸長，偷瞄左側，表情好奇",
+      iconL: "📱", iconR: "👀",
+      nameL: "滑機放鬆", nameR: "湊近偷看",
+      enL: "A person leaning sideways against an invisible railing, body relaxed, head bowed looking at an invisible phone held in both hands, expression absorbed and at ease. Full body visible. They are alone.",
+      enR: "A person leaning their body toward the LEFT of frame, neck craning forward, eyes peeking sideways with unabashed curiosity and a slight grin. Full body visible. They are alone.",
+      tag: "偷看手機"
+    },
+    {
+      label: "背包單肩甩上肩 ↔ 擋住去路攤手",
+      desc: "左：瀟灑地將背包單手甩上肩，側身轉頭，表情帥氣隨意／右：雙手攤開擋在左方路上，表情無奈又帶笑",
+      iconL: "🎒", iconR: "🤷",
+      nameL: "甩包上肩", nameR: "攤手擋路",
+      enL: "A person swinging one arm back as if tossing a backpack onto their shoulder, body mid-turn, chin lifted with a casual confident expression. Full body visible. They are alone.",
+      enR: "A person standing facing LEFT, both arms spread out to the sides palms open in a blocking gesture, expression exasperated but amused. Full body visible. They are alone.",
+      tag: "攔路搭訕"
+    },
+  ],
+
+  "🧸 童心對應動作": [
+    {
+      label: "跌倒爬起來 ↔ 蹲下鼓掌加油",
+      desc: "左：剛從地上爬起，拍拍膝蓋，嘴巴撅著／右：蹲下來對著左方拍手加油，笑眯眯",
+      iconL: "🤕", iconR: "👏",
+      nameL: "爬起來了", nameR: "鼓掌加油",
+      enL: "A person just rising from a fall, one knee still bent, one hand dusting off their knee, lips pouting slightly, expression between embarrassed and determined. Full body visible. They are alone.",
+      enR: "A person crouched down with knees bent, both hands clapping together enthusiastically, face scrunched up in an encouraging grin directed toward the LEFT of frame. Full body visible. They are alone.",
+      tag: "加油打氣"
+    },
+    {
+      label: "踮腳偷看牆頭 ↔ 在牆那頭探頭",
+      desc: "左：踮起腳尖，雙手扒住想像中的牆頭，努力往上看／右：從另一側探出腦袋，笑著往下看",
+      iconL: "🧱", iconR: "😁",
+      nameL: "踮腳偷看", nameR: "探頭往下",
+      enL: "A person up on their tiptoes, both hands gripping the top of an invisible wall, chin barely clearing the top, eyes straining upward with effort and excitement. Full body visible. They are alone.",
+      enR: "A person leaning over an invisible ledge, upper body tipping forward, head poking down toward the LEFT of frame with a cheeky delighted grin. Full body visible. They are alone.",
+      tag: "牆頭探望"
+    },
+    {
+      label: "躲在背後露出腦袋 ↔ 轉身嚇到",
+      desc: "左：整個人縮在想像的背後，只露出臉，眼睛發亮準備嚇人／右：轉身的瞬間被嚇到，誇張跳起",
+      iconL: "🫣", iconR: "😱",
+      nameL: "躲著偷笑", nameR: "被嚇跳起",
+      enL: "A person crouched and peeking out from behind an invisible object, only their face visible beyond the edge, eyes gleaming with mischief, barely containing laughter. Full body visible. They are alone.",
+      enR: "A person mid-jump from being startled, feet off the ground, arms flung upward, mouth wide open, expression of exaggerated shock and surprise. Full body visible. They are alone.",
+      tag: "嚇人遊戲"
+    },
+    {
+      label: "撒嬌癱在地 ↔ 雙手叉腰無奈",
+      desc: "左：整個人軟成一灘水，半躺半坐在地上，雙手亂揮撒嬌／右：站立雙手叉腰，俯身看著左方，搖頭又好笑",
+      iconL: "😭", iconR: "🙄",
+      nameL: "撒嬌癱地", nameR: "叉腰無奈",
+      enL: "A person dramatically slumped on the ground in an exaggerated sulk, legs sprawled, arms flailing loosely, face scrunched in a whiny pout. Full body visible. They are alone.",
+      enR: "A person standing with both hands on hips, leaning slightly forward looking down toward the LEFT, head tilted with a helpless amused expression — the look of someone dealing with nonsense. Full body visible. They are alone.",
+      tag: "撒嬌與無奈"
+    },
+    {
+      label: "比誰跳得高 ↔ 也跳起來",
+      desc: "左：使盡全力往上跳，雙手高舉，表情認真較勁／右：同樣賣力往上跳，表情既認真又好笑",
+      iconL: "⬆️", iconR: "⬆️",
+      nameL: "努力跳高", nameR: "一起跳高",
+      enL: "A person launching into a full-effort jump, both arms shooting straight up, legs propelling hard, face scrunched with competitive determination. Full body visible. They are alone.",
+      enR: "A person also mid-jump with full effort, arms up, legs pushing off, face a mix of concentration and amusement — taking the competition seriously but also laughing. Full body visible. They are alone.",
+      tag: "跳高比賽"
+    },
+    {
+      label: "躺地耍賴 ↔ 蹲下戳臉頰",
+      desc: "左：整個人躺在地上四腳朝天耍賴，不肯起來／右：蹲在旁邊，伸出一根手指戳向左方臉頰，笑著",
+      iconL: "🦥", iconR: "👆",
+      nameL: "躺地耍賴", nameR: "戳臉頰",
+      enL: "A person lying flat on their back on the ground, arms and legs spread loosely, head turned to the side in stubborn refusal, expression petulant and playfully defiant. Full body visible. They are alone.",
+      enR: "A person crouching beside an invisible figure, one index finger extended and poking toward the LEFT of frame at cheek height, face lit up with a teasing grin. Full body visible. They are alone.",
+      tag: "耍賴逗弄"
+    },
+  ],
+
+};
+
+let chosen = null;
+
+function buildUI() {
+  const tabs = document.getElementById('tabs');
+  Object.keys(DATA).forEach((cat, i) => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (i === 0 ? ' active' : '');
+    t.textContent = cat;
+    t.onclick = () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      t.classList.add('active');
+      chosen = null;
+      renderPairs(cat);
+    };
+    tabs.appendChild(t);
+  });
+  renderPairs(Object.keys(DATA)[0]);
+}
+
+function renderPairs(cat) {
+  const grid = document.getElementById('pairsGrid');
+  grid.innerHTML = '';
+  DATA[cat].forEach(pair => {
+    const c = document.createElement('div');
+    c.className = 'pair-card';
+    c.innerHTML = `
+      <div class="figures">
+        <div class="fig left-fig">
+          <span class="icon">${pair.iconL}</span>
+          <span class="side-tag">LEFT 左圖</span>
+          <span class="action-name">${pair.nameL}</span>
+        </div>
+        <div class="sep-arrow">⇄</div>
+        <div class="fig right-fig">
+          <span class="icon">${pair.iconR}</span>
+          <span class="side-tag">RIGHT 右圖</span>
+          <span class="action-name">${pair.nameR}</span>
+        </div>
+      </div>
+      <div class="pair-title">${pair.label}</div>
+      <div class="pair-desc">${pair.desc}</div>
+      <span class="pair-tag">${pair.tag}</span>
+    `;
+    c.onclick = () => {
+      document.querySelectorAll('.pair-card').forEach(x => x.classList.remove('sel'));
+      c.classList.add('sel');
+      chosen = pair;
+    };
+    grid.appendChild(c);
+  });
+}
+
+function generate() {
+  if (!chosen) { alert('請先選擇一組動作！'); return; }
+
+  const pL = document.getElementById('personL').value;
+  const pR = document.getElementById('personR').value;
+  const cl = document.getElementById('clothes').value;
+  const bg = document.getElementById('bg').value;
+  const st = document.getElementById('style').value;
+  const ang = document.getElementById('angle').value;
+
+  const shared = `Character description: ${cl}. Background: ${bg}. Art style: ${st}. Full body visible, well-lit, high quality. Camera: ${ang}.`;
+
+  // Preview
+  document.getElementById('splitPreview').innerHTML = `
+    <div class="sp-half left-half">
+      <span class="big-icon">${chosen.iconL}</span>
+      <span class="sp-side">LEFT 左圖</span>
+      <strong>${chosen.nameL}</strong>
+      <span class="sp-note">${chosen.label.split('↔')[0].trim()}</span>
+    </div>
+    <div class="sp-divider"></div>
+    <div class="sp-half right-half">
+      <span class="big-icon">${chosen.iconR}</span>
+      <span class="sp-side">RIGHT 右圖</span>
+      <strong>${chosen.nameR}</strong>
+      <span class="sp-note">${chosen.label.split('↔')[1].trim()}</span>
+    </div>
+  `;
+
+  // Combine prompt only
+  document.getElementById('promptCombine').textContent =
+`Create a split image with TWO separate panels side by side, divided by a clean vertical line.
+
+LEFT PANEL — one person only:
+Subject: ${pL}, ${cl}. ${chosen.enL} Camera: ${ang}.
+
+RIGHT PANEL — one person only:
+Subject: ${pR}, ${cl}. ${chosen.enR} Camera: opposite/mirrored direction.
+
+Rules for both panels:
+- Each panel contains exactly ONE person, no physical contact between panels
+- Same background in both panels: ${bg}
+- Same art style: ${st}
+- Same clothing color palette
+- Full body visible and centered in each panel
+- The two poses should feel like they CORRESPOND to each other as a matched pair
+- No text, no labels, no watermarks
+- High quality, ${st}`;
+
+  document.getElementById('output').classList.add('show');
+  document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyText(id, btn) {
+  const text = document.getElementById(id).textContent;
+  const originalLabel = btn.textContent;
+
+  function onSuccess() {
+    btn.textContent = '[ ✓ 已複製！]';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = originalLabel; btn.classList.remove('ok'); }, 2200);
+  }
+
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); onSuccess(); }
+    catch(e) { btn.textContent = '[ 請手動複製 ]'; setTimeout(() => { btn.textContent = originalLabel; }, 2200); }
+    document.body.removeChild(ta);
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(onSuccess).catch(fallback);
+  } else { fallback(); }
+}
+
+buildUI();
+</script>
+</body>
+</html>
