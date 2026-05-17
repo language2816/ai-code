@@ -872,6 +872,65 @@
   }
   body.light::before { opacity: 0.3; }
 
+  /* ── MUSIC CONTROLS ── */
+  .music-btn {
+    position: fixed;
+    top: 1.2rem;
+    right: 8rem;
+    z-index: 999;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    transition: all 0.2s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  }
+  .music-btn:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
+  .music-btn.playing { border-color: var(--green); color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+  .music-btn.playing .music-icon { animation: musicPulse 0.6s ease-in-out infinite alternate; }
+
+  .vol-bar {
+    position: fixed;
+    top: 3.8rem;
+    right: 8rem;
+    z-index: 999;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 0.35rem 0.7rem;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .vol-bar.show { display: flex; }
+  .vol-bar input[type=range] {
+    width: 70px;
+    accent-color: var(--cyan);
+    cursor: pointer;
+    appearance: auto;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  @keyframes musicPulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.3); }
+  }
+
   /* ── STATUS INDICATOR (decorative) ── */
   .status-dot {
     display: inline-block;
@@ -898,6 +957,12 @@
 <div class="corner-br"></div>
 
 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀ LIGHT</button>
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">
+  <span class="music-icon">♪</span><span id="musicLabel">BGM</span>
+</button>
+<div class="vol-bar" id="volBar">
+  VOL <input type="range" id="volSlider" min="0" max="100" value="30" oninput="setVolume(this.value)">
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -4003,6 +4068,270 @@ function copyText(id, btn) {
 }
 
 buildUI();
+
+// ══════════════════════════════════════════════
+// ── AUDIO ENGINE ──
+// ══════════════════════════════════════════════
+let audioCtx = null;
+let bgmNodes = {};
+let bgmPlaying = false;
+let masterGain = null;
+let currentVol = 0.30;
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = currentVol;
+    masterGain.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+// ── BACKGROUND MUSIC (layered synth ambience) ──
+function startBGM() {
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+
+  // Layer 1: Deep drone bass
+  const drone = ctx.createOscillator();
+  const droneGain = ctx.createGain();
+  drone.type = 'sawtooth';
+  drone.frequency.value = 55;
+  droneGain.gain.value = 0.06;
+  drone.connect(droneGain);
+  droneGain.connect(masterGain);
+  drone.start();
+
+  // Layer 2: Mid pulse
+  const pulse = ctx.createOscillator();
+  const pulseGain = ctx.createGain();
+  pulse.type = 'square';
+  pulse.frequency.value = 110;
+  pulseGain.gain.value = 0;
+  pulse.connect(pulseGain);
+  pulseGain.connect(masterGain);
+  pulse.start();
+
+  // Pulse LFO
+  const pulseLFO = ctx.createOscillator();
+  const pulseLFOGain = ctx.createGain();
+  pulseLFO.frequency.value = 0.25;
+  pulseLFOGain.gain.value = 0.04;
+  pulseLFO.connect(pulseLFOGain);
+  pulseLFOGain.connect(pulseGain.gain);
+  pulseLFO.start();
+
+  // Layer 3: High shimmer pad
+  const pad = ctx.createOscillator();
+  const padGain = ctx.createGain();
+  const padFilter = ctx.createBiquadFilter();
+  pad.type = 'sawtooth';
+  pad.frequency.value = 440;
+  padFilter.type = 'lowpass';
+  padFilter.frequency.value = 800;
+  padGain.gain.value = 0.03;
+  pad.connect(padFilter);
+  padFilter.connect(padGain);
+  padGain.connect(masterGain);
+  pad.start();
+
+  // Pad frequency drift
+  const padLFO = ctx.createOscillator();
+  const padLFOGain = ctx.createGain();
+  padLFO.frequency.value = 0.07;
+  padLFOGain.gain.value = 8;
+  padLFO.connect(padLFOGain);
+  padLFOGain.connect(pad.frequency);
+  padLFO.start();
+
+  // Layer 4: Rhythmic click/glitch
+  let glitchTimer = null;
+  function scheduleGlitch() {
+    const delay = 400 + Math.random() * 1200;
+    glitchTimer = setTimeout(() => {
+      if (!bgmPlaying) return;
+      playGlitchTick(ctx);
+      scheduleGlitch();
+    }, delay);
+  }
+  scheduleGlitch();
+
+  // Layer 5: Sub-bass heartbeat
+  let beatTimer = null;
+  function scheduleBeat() {
+    beatTimer = setTimeout(() => {
+      if (!bgmPlaying) return;
+      playSubBeat(ctx);
+      setTimeout(() => { if (bgmPlaying) playSubBeat(ctx); }, 220);
+      scheduleBeat();
+    }, 1800 + Math.random() * 400);
+  }
+  scheduleBeat();
+
+  bgmNodes = { drone, pulse, pulseLFO, pad, padLFO, droneGain, pulseGain, padGain, glitchTimer, beatTimer };
+}
+
+function playGlitchTick(ctx) {
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+  const src = ctx.createBufferSource();
+  const g = ctx.createGain();
+  const f = ctx.createBiquadFilter();
+  f.type = 'bandpass';
+  f.frequency.value = 2000 + Math.random() * 3000;
+  g.gain.value = 0.04;
+  src.buffer = buf;
+  src.connect(f);
+  f.connect(g);
+  g.connect(masterGain);
+  src.start();
+}
+
+function playSubBeat(ctx) {
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(80, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.15);
+  g.gain.setValueAtTime(0.18, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.connect(g);
+  g.connect(masterGain);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.2);
+}
+
+function stopBGM() {
+  if (!bgmNodes.drone) return;
+  try {
+    bgmNodes.drone.stop();
+    bgmNodes.pulse.stop();
+    bgmNodes.pulseLFO.stop();
+    bgmNodes.pad.stop();
+    bgmNodes.padLFO.stop();
+    clearTimeout(bgmNodes.glitchTimer);
+    clearTimeout(bgmNodes.beatTimer);
+  } catch(e) {}
+  bgmNodes = {};
+}
+
+function toggleMusic() {
+  const btn = document.getElementById('musicBtn');
+  const label = document.getElementById('musicLabel');
+  const volBar = document.getElementById('volBar');
+  bgmPlaying = !bgmPlaying;
+  if (bgmPlaying) {
+    startBGM();
+    btn.classList.add('playing');
+    label.textContent = 'ON';
+    volBar.classList.add('show');
+  } else {
+    stopBGM();
+    btn.classList.remove('playing');
+    label.textContent = 'BGM';
+    volBar.classList.remove('show');
+  }
+}
+
+function setVolume(val) {
+  currentVol = val / 100;
+  if (masterGain) masterGain.gain.value = currentVol;
+}
+
+// ── SFX ──
+function sfxClick() {
+  if (!audioCtx) return;
+  const ctx = audioCtx;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(880, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.06);
+  g.gain.setValueAtTime(0.12, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(); osc.stop(ctx.currentTime + 0.1);
+}
+
+function sfxSelect() {
+  if (!audioCtx) return;
+  const ctx = audioCtx;
+  [0, 0.06, 0.12].forEach((t, i) => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = [440, 550, 660][i];
+    g.gain.setValueAtTime(0, ctx.currentTime + t);
+    g.gain.linearRampToValueAtTime(0.1, ctx.currentTime + t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.1);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(ctx.currentTime + t);
+    osc.stop(ctx.currentTime + t + 0.12);
+  });
+}
+
+function sfxGenerate() {
+  if (!audioCtx) return;
+  const ctx = audioCtx;
+  // Rising sweep
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(200, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.3);
+  g.gain.setValueAtTime(0.1, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 2000;
+  osc.connect(filter); filter.connect(g); g.connect(masterGain);
+  osc.start(); osc.stop(ctx.currentTime + 0.4);
+
+  // Confirmation beep
+  setTimeout(() => {
+    if (!audioCtx) return;
+    const o2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    o2.type = 'sine';
+    o2.frequency.value = 1046;
+    g2.gain.setValueAtTime(0.12, ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    o2.connect(g2); g2.connect(masterGain);
+    o2.start(); o2.stop(ctx.currentTime + 0.22);
+  }, 320);
+}
+
+function sfxCopy() {
+  if (!audioCtx) return;
+  const ctx = audioCtx;
+  [0, 0.08].forEach((t, i) => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = i === 0 ? 783 : 1046;
+    g.gain.setValueAtTime(0.13, ctx.currentTime + t);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.15);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(ctx.currentTime + t);
+    osc.stop(ctx.currentTime + t + 0.18);
+  });
+}
+
+function sfxTab() {
+  if (!audioCtx) return;
+  const ctx = audioCtx;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(660, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.08);
+  g.gain.setValueAtTime(0.08, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(); osc.stop(ctx.currentTime + 0.12);
+}
 </script>
 </body>
 </html>
