@@ -3,89 +3,234 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>雙格單人動作提示詞</title>
+<title>雙格單人動作提示詞 // DUAL.POSE.SYS</title>
 <style>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&family=Space+Mono:wght@400;700&family=Rajdhani:wght@500;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #111318;
-    --surface: #1c1f27;
-    --card: #22262f;
-    --border: #2e3240;
-    --text: #e8eaf0;
-    --muted: #6b7080;
-    --red: #e8453c;
-    --blue: #3c7fe8;
-    --gold: #e8b43c;
-    --green: #3cb87a;
-    --radius: 14px;
+    --bg: #060810;
+    --surface: #0c0f1a;
+    --card: #0f1220;
+    --card2: #111525;
+    --border: #1a2040;
+    --border2: #1e2850;
+    --text: #d0daf5;
+    --muted: #485070;
+    --dim: #2a3455;
+    --red: #ff3a5c;
+    --red-glow: rgba(255,58,92,0.18);
+    --blue: #00b4ff;
+    --blue-glow: rgba(0,180,255,0.18);
+    --cyan: #00e5ff;
+    --cyan-glow: rgba(0,229,255,0.12);
+    --gold: #ffa420;
+    --gold-glow: rgba(255,164,32,0.2);
+    --green: #00ffb0;
+    --green-glow: rgba(0,255,176,0.15);
+    --purple: #9b59ff;
+    --radius: 4px;
+    --radius-lg: 8px;
   }
 
+  /* ── SCANLINE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,229,255,0.012) 2px,
+      rgba(0,229,255,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── AMBIENT GLOW BG ── */
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Noto Sans TC', sans-serif;
     min-height: 100vh;
-    padding: 2rem 1rem 5rem;
+    padding: 2rem 1rem 6rem;
     background-image:
-      radial-gradient(ellipse 70% 40% at 0% 0%, rgba(232,69,60,0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 35% at 100% 100%, rgba(60,127,232,0.07) 0%, transparent 60%);
+      radial-gradient(ellipse 55% 30% at 5% 5%, rgba(255,58,92,0.07) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 25% at 95% 95%, rgba(0,180,255,0.08) 0%, transparent 65%),
+      radial-gradient(ellipse 30% 20% at 50% 50%, rgba(155,89,255,0.04) 0%, transparent 70%);
   }
+
+  /* ── GRID TEXTURE ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SYSTEM BAR ── */
+  .sys-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--purple), var(--blue), var(--cyan));
+    z-index: 1000;
+    animation: scanBar 4s ease-in-out infinite;
+  }
+  @keyframes scanBar {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* ── CORNER DECORATIONS ── */
+  .corner-tl, .corner-br {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+    z-index: 998;
+    opacity: 0.35;
+  }
+  .corner-tl { top: 8px; left: 8px;
+    border-top: 2px solid var(--cyan);
+    border-left: 2px solid var(--cyan);
+  }
+  .corner-br { bottom: 8px; right: 8px;
+    border-bottom: 2px solid var(--red);
+    border-right: 2px solid var(--red);
+  }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position: fixed;
+    top: 1.2rem;
+    right: 1.2rem;
+    z-index: 999;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    transition: all 0.2s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  }
+  .theme-toggle:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
 
   /* ── HEADER ── */
   .header {
-    max-width: 920px;
+    max-width: 1100px;
     margin: 0 auto 2.5rem;
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: end;
     gap: 1rem;
+    padding: 0 1rem 1.8rem;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 1.4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--cyan);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .header-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 1px;
+    background: var(--cyan);
+    opacity: 0.7;
   }
 
   .header h1 {
-    font-size: clamp(1.6rem, 4vw, 2.6rem);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(1.8rem, 4.5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.0;
+    text-transform: uppercase;
   }
 
-  .header h1 .r { color: var(--red); }
-  .header h1 .b { color: var(--blue); }
-  .header p { color: var(--muted); font-size: 0.82rem; margin-top: 0.5rem; line-height: 1.6; }
+  .header h1 .r { color: var(--red); text-shadow: 0 0 20px var(--red-glow); }
+  .header h1 .b { color: var(--blue); text-shadow: 0 0 20px var(--blue-glow); }
+  .header h1 .sep { color: var(--dim); margin: 0 0.15em; }
+
+  .header-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.7rem;
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+  }
 
   .concept-badge {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.7rem 1rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 0.9rem 1.2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
     color: var(--muted);
     text-align: center;
-    line-height: 1.8;
+    line-height: 2;
     white-space: nowrap;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  .concept-badge::before {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 12px; height: 12px;
+    background: var(--cyan);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    opacity: 0.5;
   }
 
-  .concept-badge span { display: block; color: var(--gold); font-size: 1.1rem; }
+  .concept-badge span { display: block; color: var(--gold); font-size: 1.2rem; text-shadow: 0 0 12px var(--gold-glow); }
 
-  /* ── MAIN LAYOUT ── */
-  .main { max-width: 920px; margin: 0 auto; }
-
+  /* ── MONO LABEL ── */
   .mono-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--cyan);
     margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .mono-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border2), transparent);
   }
 
-  /* ── CATEGORY TABS ── */
+  /* ── TABS (mobile) ── */
   .tabs {
     display: flex;
     flex-wrap: wrap;
@@ -96,316 +241,33 @@
   .tab {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 0.4rem 0.9rem;
-    font-size: 0.82rem;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.16s;
-    font-family: 'Noto Sans TC', sans-serif;
-  }
-
-  .tab:hover { color: var(--text); border-color: #4a5060; }
-  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 700; }
-
-  /* ── PAIR CARDS ── */
-  .pairs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-    gap: 0.9rem;
-    margin-bottom: 2rem;
-  }
-
-  .pair-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem;
-    cursor: pointer;
-    transition: all 0.18s;
-    position: relative;
-  }
-
-  .pair-card:hover { transform: translateY(-2px); border-color: #4a5060; }
-  .pair-card.sel { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 8px 28px rgba(232,180,60,0.12); }
-
-  /* Two figure boxes side by side */
-  .figures {
-    display: grid;
-    grid-template-columns: 1fr 20px 1fr;
-    gap: 0;
-    align-items: center;
-    margin-bottom: 0.9rem;
-  }
-
-  .fig {
-    background: var(--surface);
-    border-radius: 8px;
-    padding: 0.75rem 0.4rem 0.5rem;
-    text-align: center;
-  }
-
-  .fig .icon { font-size: 1.8rem; display: block; }
-
-  .fig .side-tag {
-    display: inline-block;
-    margin-top: 0.4rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.58rem;
-    letter-spacing: 0.1em;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-  }
-
-  .fig.left-fig .side-tag { background: rgba(232,69,60,0.15); color: var(--red); }
-  .fig.right-fig .side-tag { background: rgba(60,127,232,0.15); color: var(--blue); }
-
-  .fig .action-name {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-top: 0.3rem;
-    color: var(--text);
-  }
-
-  .sep-arrow {
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--gold);
-    font-weight: 900;
-  }
-
-  .pair-title { font-weight: 700; font-size: 0.88rem; margin-bottom: 0.2rem; }
-  .pair-desc { font-size: 0.73rem; color: var(--muted); line-height: 1.5; }
-  .pair-tag {
-    margin-top: 0.6rem;
-    display: inline-block;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    padding: 0.18rem 0.55rem;
-    border-radius: 20px;
-    background: var(--surface);
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-
-  /* ── OPTIONS ── */
-  .options-panel {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .opt label {
-    display: block;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.14em;
-    color: var(--muted);
-    margin-bottom: 0.35rem;
-  }
-
-  select {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 0.45rem 0.75rem;
-    font-size: 0.82rem;
-    font-family: 'Noto Sans TC', sans-serif;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7080'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.7rem center;
-    padding-right: 1.8rem;
-  }
-
-  select:focus { border-color: var(--gold); }
-
-  /* ── GENERATE BUTTON ── */
-  .gen-wrap { text-align: center; margin-bottom: 2.5rem; }
-
-  .gen-btn {
-    background: var(--gold);
-    color: #111;
-    border: none;
-    border-radius: 50px;
-    padding: 0.85rem 2.8rem;
-    font-size: 1rem;
-    font-weight: 900;
-    cursor: pointer;
-    font-family: 'Noto Sans TC', sans-serif;
-    letter-spacing: 0.04em;
-    transition: all 0.2s;
-    box-shadow: 0 4px 24px rgba(232,180,60,0.25);
-  }
-
-  .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,180,60,0.4); }
-  .gen-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  /* ── OUTPUT ── */
-  #output { display: none; }
-  #output.show { display: block; }
-
-  /* Visual preview of the split */
-  .split-preview {
-    display: grid;
-    grid-template-columns: 1fr 4px 1fr;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    margin-bottom: 1.5rem;
-    min-height: 130px;
-  }
-
-  .sp-half {
-    background: var(--card);
-    padding: 1.4rem 1rem 1.2rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .sp-divider { background: var(--border); }
-
-  .sp-half .big-icon { font-size: 3.2rem; }
-  .sp-half .sp-side {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.14em;
-    padding: 0.15rem 0.6rem;
-    border-radius: 4px;
-  }
-
-  .sp-half.left-half .sp-side { background: rgba(232,69,60,0.15); color: var(--red); }
-  .sp-half.right-half .sp-side { background: rgba(60,127,232,0.15); color: var(--blue); }
-
-  .sp-half strong { font-size: 0.95rem; }
-  .sp-half .sp-note { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
-
-  /* Prompt blocks */
-  .prompt-block {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.4rem;
-    margin-bottom: 1rem;
-  }
-
-  .prompt-block h3 {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.18em;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.6rem;
-    margin-bottom: 1rem;
-  }
-
-  .prompt-block h3 .pill {
-    display: inline-block;
-    padding: 0.12rem 0.55rem;
-    border-radius: 4px;
-    margin-right: 0.5rem;
-    font-size: 0.6rem;
-  }
-
-  .pill-left { background: rgba(232,69,60,0.2); color: var(--red); }
-  .pill-right { background: rgba(60,127,232,0.2); color: var(--blue); }
-  .pill-both { background: rgba(232,180,60,0.2); color: var(--gold); }
-
-  .prompt-text {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.77rem;
-    line-height: 1.85;
-    color: #c0c8d8;
-    white-space: pre-wrap;
-    word-break: break-word;
-    background: var(--surface);
-    border-radius: 8px;
-    padding: 1rem 1.1rem;
-  }
-
-  .copy-btn {
-    margin-top: 0.8rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.4rem 1rem;
-    font-size: 0.72rem;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    transition: all 0.15s;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-  }
-
-  .copy-btn:hover { border-color: var(--gold); color: var(--gold); }
-  .copy-btn.ok { border-color: var(--green); color: var(--green); }
-
-  .tip-box {
-    background: rgba(232,180,60,0.07);
-    border: 1px solid rgba(232,180,60,0.2);
-    border-radius: var(--radius);
-    padding: 1rem 1.2rem;
-    font-size: 0.78rem;
-    color: #b0a070;
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-  }
-
-  .tip-box strong { color: var(--gold); display: block; margin-bottom: 0.3rem; font-size: 0.72rem; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; }
-  /* ── THEME TOGGLE ── */
-  .theme-toggle {
-    position: fixed;
-    top: 1.2rem;
-    right: 1.2rem;
-    z-index: 999;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 0.4rem 0.8rem;
+    border-radius: 2px;
+    padding: 0.38rem 0.85rem;
     font-size: 0.75rem;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
     color: var(--muted);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.04em;
   }
-  .theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
-
-  /* ── LIGHT THEME ── */
-  body.light {
-    --bg: #f5f4f0;
-    --surface: #eceae4;
-    --card: #e2e0d8;
-    --border: #ccc9be;
-    --text: #1a1a1a;
-    --muted: #7a7870;
+  .tab:hover { color: var(--text); border-color: var(--border2); }
+  .tab.active {
+    background: rgba(0,229,255,0.08);
+    color: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,229,255,0.12), inset 0 0 8px rgba(0,229,255,0.04);
   }
-  body.light .header { border-bottom-color: var(--border); }
 
-  /* ── LAYOUT WITH SIDEBAR ── */
+  /* ── LAYOUT ── */
   .layout {
     max-width: 1100px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 195px 1fr;
     gap: 1.5rem;
     align-items: start;
+    position: relative;
+    z-index: 1;
   }
 
   @media (max-width: 700px) {
@@ -418,20 +280,28 @@
   .sidebar {
     position: sticky;
     top: 1.5rem;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
     overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   }
 
   .sidebar-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.18em;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--cyan);
     padding: 0.75rem 1rem 0.5rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .sidebar-title::before {
+    content: '//';
+    opacity: 0.5;
   }
 
   .sidebar-tab {
@@ -442,7 +312,7 @@
     border: none;
     border-bottom: 1px solid var(--border);
     padding: 0.6rem 1rem;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--muted);
     cursor: pointer;
     transition: all 0.15s;
@@ -450,124 +320,445 @@
     position: relative;
   }
   .sidebar-tab:last-child { border-bottom: none; }
-  .sidebar-tab:hover { color: var(--text); background: var(--surface); }
+  .sidebar-tab:hover { color: var(--text); background: rgba(0,229,255,0.03); }
   .sidebar-tab.active {
-    color: var(--text);
-    background: var(--surface);
+    color: var(--cyan);
+    background: rgba(0,229,255,0.06);
     font-weight: 700;
-    border-left: 3px solid var(--gold);
-    padding-left: calc(1rem - 3px);
+    border-left: 2px solid var(--cyan);
+    padding-left: calc(1rem - 2px);
+    box-shadow: inset 0 0 12px rgba(0,229,255,0.04);
   }
   .sidebar-tab .fav-dot {
     position: absolute;
     right: 0.7rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: var(--gold);
     display: none;
+    box-shadow: 0 0 6px var(--gold-glow);
   }
   .sidebar-tab.has-fav .fav-dot { display: block; }
 
-  /* ── MOBILE TABS (hidden on desktop) ── */
+  /* ── MOBILE TABS hidden on desktop ── */
   .tabs { display: none; }
   @media (max-width: 700px) {
     .tabs { display: flex; }
     .layout { display: block; }
   }
 
-  /* ── MAIN CONTENT AREA ── */
   .content-area { min-width: 0; }
 
-  /* ── DIFFICULTY BADGES on cards ── */
-  .diff-badge {
-    position: absolute;
-    top: 0.6rem;
-    right: 0.6rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.55rem;
-    letter-spacing: 0.08em;
-    padding: 0.12rem 0.45rem;
-    border-radius: 4px;
-  }
-  .diff-easy   { background: rgba(60,184,122,0.15); color: var(--green); }
-  .diff-mid    { background: rgba(232,180,60,0.15); color: var(--gold); }
-  .diff-hard   { background: rgba(232,69,60,0.15);  color: var(--red); }
-
-  /* ── FAVOURITE STAR on cards ── */
-  .fav-btn {
-    position: absolute;
-    top: 0.55rem;
-    left: 0.65rem;
-    background: none;
-    border: none;
-    font-size: 0.85rem;
-    cursor: pointer;
-    opacity: 0.3;
-    transition: opacity 0.15s, transform 0.15s;
-    padding: 0;
-    line-height: 1;
-  }
-  .fav-btn:hover { opacity: 0.7; transform: scale(1.2); }
-  .fav-btn.starred { opacity: 1; }
-
-  /* ── TOOLBAR ROW (random + filter) ── */
+  /* ── TOOLBAR ── */
   .toolbar {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     margin-bottom: 1.1rem;
     flex-wrap: wrap;
   }
 
-  .random-btn {
+  .random-btn, .filter-btn, .swap-btn {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 50px;
+    border: 1px solid var(--border2);
+    border-radius: 2px;
     padding: 0.38rem 0.9rem;
-    font-size: 0.78rem;
+    font-size: 0.7rem;
     cursor: pointer;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Space Mono', monospace;
     color: var(--muted);
-    transition: all 0.16s;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+    transition: all 0.18s;
+    letter-spacing: 0.04em;
   }
-  .random-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-  .filter-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 0.38rem 0.9rem;
-    font-size: 0.78rem;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    color: var(--muted);
-    transition: all 0.16s;
-  }
-  .filter-btn:hover { color: var(--text); border-color: #4a5060; }
-  .filter-btn.on { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 700; }
+  .random-btn:hover { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+  .swap-btn:hover { border-color: var(--blue); color: var(--blue); box-shadow: 0 0 8px var(--blue-glow); }
+  .filter-btn:hover { color: var(--text); border-color: var(--border2); }
+  .filter-btn.on { background: rgba(0,229,255,0.1); color: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
 
   .toolbar-spacer { flex: 1; }
 
-  .swap-btn {
+  /* ── PAIR CARDS ── */
+  .pairs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .pair-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  .pair-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 11px; height: 11px;
+    background: var(--border2);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    transition: background 0.2s;
+  }
+
+  .pair-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border2);
+    background: var(--card2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .pair-card:hover::before { background: var(--dim); }
+
+  .pair-card.sel {
+    border-color: var(--cyan);
+    background: rgba(0,229,255,0.04);
+    box-shadow: 0 0 0 1px var(--cyan), 0 0 20px rgba(0,229,255,0.1), 0 8px 28px rgba(0,0,0,0.5);
+  }
+  .pair-card.sel::before { background: var(--cyan); }
+
+  /* Two figure boxes */
+  .figures {
+    display: grid;
+    grid-template-columns: 1fr 18px 1fr;
+    gap: 0;
+    align-items: center;
+    margin-bottom: 0.85rem;
+  }
+
+  .fig {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 0.38rem 0.9rem;
-    font-size: 0.78rem;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    color: var(--muted);
-    transition: all 0.16s;
+    border-radius: 2px;
+    padding: 0.65rem 0.3rem 0.5rem;
+    text-align: center;
+    transition: border-color 0.2s;
   }
-  .swap-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .pair-card.sel .fig { border-color: var(--border2); }
 
-  /* ── MJ FORMAT TAB ── */
+  .fig .icon { font-size: 1.7rem; display: block; }
+
+  .fig .side-tag {
+    display: inline-block;
+    margin-top: 0.35rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 1px;
+  }
+
+  .fig.left-fig .side-tag { background: rgba(255,58,92,0.12); color: var(--red); border: 1px solid rgba(255,58,92,0.2); }
+  .fig.right-fig .side-tag { background: rgba(0,180,255,0.12); color: var(--blue); border: 1px solid rgba(0,180,255,0.2); }
+
+  .fig .action-name {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+    color: var(--text);
+  }
+
+  .sep-arrow {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--cyan);
+    font-weight: 900;
+    text-shadow: 0 0 8px var(--cyan-glow);
+  }
+
+  .pair-title { font-weight: 700; font-size: 0.84rem; margin-bottom: 0.18rem; color: var(--text); }
+  .pair-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.5; }
+
+  .pair-tag {
+    margin-top: 0.5rem;
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    padding: 0.14rem 0.5rem;
+    border-radius: 1px;
+    background: var(--surface);
+    color: var(--dim);
+    border: 1px solid var(--border);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── DIFF BADGES ── */
+  .diff-badge {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.9rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 1px;
+    text-transform: uppercase;
+  }
+  .diff-easy { background: rgba(0,255,176,0.1); color: var(--green); border: 1px solid rgba(0,255,176,0.2); }
+  .diff-mid  { background: rgba(255,164,32,0.1); color: var(--gold); border: 1px solid rgba(255,164,32,0.2); }
+  .diff-hard { background: rgba(255,58,92,0.1); color: var(--red); border: 1px solid rgba(255,58,92,0.2); }
+
+  /* ── FAV BTN ── */
+  .fav-btn {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.6rem;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    cursor: pointer;
+    opacity: 0.25;
+    transition: opacity 0.15s, transform 0.15s, filter 0.15s;
+    padding: 0;
+    line-height: 1;
+  }
+  .fav-btn:hover { opacity: 0.7; transform: scale(1.25); }
+  .fav-btn.starred { opacity: 1; filter: drop-shadow(0 0 5px var(--gold)); }
+
+  /* ── OPTIONS PANEL ── */
+  .options-panel {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .options-panel::before {
+    content: 'CONFIG';
+    position: absolute;
+    top: 0.4rem; right: 1.2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    color: var(--border2);
+  }
+
+  .opt label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+
+  select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    color: var(--text);
+    padding: 0.42rem 0.7rem;
+    font-size: 0.78rem;
+    font-family: 'Noto Sans TC', sans-serif;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23485070'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    padding-right: 1.6rem;
+  }
+  select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 1px rgba(0,229,255,0.2), 0 0 10px rgba(0,229,255,0.08);
+  }
+  select option { background: var(--surface); }
+
+  /* ── GENERATE BUTTON ── */
+  .gen-wrap { text-align: center; margin-bottom: 2.5rem; }
+
+  .gen-btn {
+    background: transparent;
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    border-radius: 2px;
+    padding: 0.9rem 3.2rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: all 0.22s;
+    box-shadow: 0 0 20px rgba(0,229,255,0.12), inset 0 0 20px rgba(0,229,255,0.03);
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .gen-btn::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    opacity: 0;
+    transition: opacity 0.22s;
+    z-index: -1;
+    clip-path: inherit;
+  }
+  .gen-btn:hover {
+    color: #060810;
+    box-shadow: 0 0 30px rgba(0,229,255,0.35), 0 0 60px rgba(0,229,255,0.15);
+    transform: translateY(-2px);
+    background: var(--cyan);
+  }
+  .gen-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  /* ── OUTPUT ── */
+  #output { display: none; }
+  #output.show { display: block; }
+
+  /* ── SPLIT PREVIEW ── */
+  .split-preview {
+    display: grid;
+    grid-template-columns: 1fr 3px 1fr;
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid var(--border2);
+    margin-bottom: 1.5rem;
+    min-height: 130px;
+  }
+
+  .sp-half {
+    background: var(--card);
+    padding: 1.4rem 1rem 1.2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    position: relative;
+  }
+  .sp-half.left-half { background: linear-gradient(135deg, rgba(255,58,92,0.05) 0%, var(--card) 60%); }
+  .sp-half.right-half { background: linear-gradient(225deg, rgba(0,180,255,0.05) 0%, var(--card) 60%); }
+
+  .sp-divider { background: linear-gradient(180deg, var(--red), var(--purple), var(--blue)); }
+
+  .sp-half .big-icon { font-size: 3rem; filter: drop-shadow(0 0 8px rgba(255,255,255,0.2)); }
+  .sp-half .sp-side {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    padding: 0.12rem 0.5rem;
+    border-radius: 1px;
+  }
+  .sp-half.left-half .sp-side { background: rgba(255,58,92,0.12); color: var(--red); border: 1px solid rgba(255,58,92,0.2); }
+  .sp-half.right-half .sp-side { background: rgba(0,180,255,0.12); color: var(--blue); border: 1px solid rgba(0,180,255,0.2); }
+
+  .sp-half strong { font-size: 0.9rem; color: var(--text); }
+  .sp-half .sp-note { font-size: 0.7rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── PROMPT BLOCKS ── */
+  .prompt-block {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 1.4rem;
+    margin-bottom: 1rem;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .prompt-block::after {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 15px; height: 15px;
+    background: var(--cyan);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    opacity: 0.3;
+  }
+
+  .prompt-block h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border2);
+    padding-bottom: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .prompt-block h3 .pill {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 1px;
+    margin-right: 0.5rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
+  }
+
+  .pill-left { background: rgba(255,58,92,0.15); color: var(--red); border: 1px solid rgba(255,58,92,0.25); }
+  .pill-right { background: rgba(0,180,255,0.15); color: var(--blue); border: 1px solid rgba(0,180,255,0.25); }
+  .pill-both { background: rgba(0,229,255,0.1); color: var(--cyan); border: 1px solid rgba(0,229,255,0.2); }
+
+  .prompt-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.9;
+    color: #8090b8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1rem 1.1rem;
+    position: relative;
+  }
+  .prompt-text::before {
+    content: '> OUTPUT';
+    position: absolute;
+    top: 0.4rem; right: 0.7rem;
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    color: var(--border2);
+  }
+
+  .copy-btn {
+    margin-top: 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
+    padding: 0.4rem 1rem;
+    font-size: 0.68rem;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    transition: all 0.15s;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .copy-btn:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
+  .copy-btn.ok { border-color: var(--green); color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+
+  /* ── TIP BOX ── */
+  .tip-box {
+    background: rgba(255,164,32,0.05);
+    border: 1px solid rgba(255,164,32,0.18);
+    border-radius: 2px;
+    padding: 0.9rem 1.2rem;
+    font-size: 0.75rem;
+    color: #907040;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid rgba(255,164,32,0.5);
+  }
+  .tip-box strong { color: var(--gold); display: block; margin-bottom: 0.3rem; font-size: 0.65rem; font-family: 'Space Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* ── FORMAT TABS ── */
   .format-tabs {
     display: flex;
     gap: 0.4rem;
@@ -576,77 +767,83 @@
   .fmt-tab {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 2px;
     padding: 0.3rem 0.8rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
     cursor: pointer;
     color: var(--muted);
     transition: all 0.15s;
+    letter-spacing: 0.04em;
   }
-  .fmt-tab.active { border-color: var(--gold); color: var(--gold); }
+  .fmt-tab.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.06); }
 
-  /* Prompt char count */
+  /* ── CHAR COUNT ── */
   .char-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
     color: var(--muted);
     text-align: right;
     margin-top: 0.4rem;
+    letter-spacing: 0.06em;
   }
 
   /* ── HISTORY PANEL ── */
   .history-panel {
     background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    border-radius: 2px;
     padding: 1rem 1.2rem;
     margin-bottom: 1.5rem;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   }
   .history-panel h3 {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
     letter-spacing: 0.18em;
-    color: var(--muted);
+    text-transform: uppercase;
+    color: var(--purple);
     margin-bottom: 0.75rem;
   }
-  .history-list { display: flex; flex-direction: column; gap: 0.4rem; }
+  .history-list { display: flex; flex-direction: column; gap: 0.35rem; }
   .history-item {
     display: flex;
     align-items: center;
     gap: 0.6rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.45rem 0.8rem;
+    border-radius: 2px;
+    padding: 0.4rem 0.75rem;
     cursor: pointer;
     transition: border-color 0.15s;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
   }
-  .history-item:hover { border-color: var(--gold); }
-  .history-item .h-icons { font-size: 1rem; flex-shrink: 0; }
+  .history-item:hover { border-color: var(--purple); box-shadow: 0 0 6px rgba(155,89,255,0.1); }
+  .history-item .h-icons { font-size: 0.95rem; flex-shrink: 0; }
   .history-item .h-label { flex: 1; color: var(--text); }
-  .history-item .h-time { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); }
+  .history-item .h-time { font-family: 'Space Mono', monospace; font-size: 0.56rem; color: var(--muted); }
 
-  /* ── QUICK-SELECT PREVIEW ── */
+  /* ── INLINE PREVIEW ── */
   .inline-preview {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.8rem 1rem;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 2px;
+    padding: 0.75rem 1rem;
     margin-bottom: 1.2rem;
     display: none;
     align-items: center;
     gap: 1rem;
     animation: fadeSlideIn 0.2s ease;
+    box-shadow: 0 0 12px rgba(0,229,255,0.06);
   }
   .inline-preview.show { display: flex; }
-  .inline-preview .ip-icons { font-size: 1.5rem; }
-  .inline-preview .ip-label { flex: 1; font-size: 0.85rem; font-weight: 700; }
-  .inline-preview .ip-desc { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+  .inline-preview .ip-icons { font-size: 1.4rem; }
+  .inline-preview .ip-label { flex: 1; font-size: 0.85rem; font-weight: 700; color: var(--cyan); }
+  .inline-preview .ip-desc { font-size: 0.7rem; color: var(--muted); margin-top: 0.12rem; font-family: 'Space Mono', monospace; }
   .inline-preview .ip-clear {
     background: none; border: none; cursor: pointer;
     color: var(--muted); font-size: 0.85rem; padding: 0;
+    font-family: 'Space Mono', monospace;
   }
   .inline-preview .ip-clear:hover { color: var(--red); }
 
@@ -654,18 +851,62 @@
     from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ── LIGHT THEME ── */
+  body.light {
+    --bg: #f0f2f8;
+    --surface: #e4e8f2;
+    --card: #dce0ee;
+    --card2: #d4d8e8;
+    --border: #c0c8de;
+    --border2: #a8b4d0;
+    --text: #1a2040;
+    --muted: #6878a0;
+    --dim: #9090b0;
+    background-image: none;
+  }
+  body.light::after {
+    background-image:
+      linear-gradient(rgba(0,100,200,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,100,200,0.04) 1px, transparent 1px);
+  }
+  body.light::before { opacity: 0.3; }
+
+  /* ── STATUS INDICATOR (decorative) ── */
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green-glow);
+    animation: pulse 2s ease-in-out infinite;
+    margin-right: 0.3rem;
+    vertical-align: middle;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
 </style>
 </head>
 <body>
 
-<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️ 淺色</button>
+<!-- Decorative system elements -->
+<div class="sys-bar"></div>
+<div class="corner-tl"></div>
+<div class="corner-br"></div>
 
-<div class="header" style="max-width:1100px;margin:0 auto 2.5rem;padding:0 1rem 1.4rem;border-bottom:1px solid var(--border)">
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀ LIGHT</button>
+
+<!-- HEADER -->
+<div class="header">
   <div>
-    <h1><span class="r">左一人</span> ＋ <span class="b">右一人</span></h1>
-    <p>
-      左圖一個人做對應動作 ／ 右圖一個人做呼應動作<br>
-      各自獨立生成，合在一起像一組互動畫面
+    <div class="header-eyebrow"><span class="status-dot"></span>DUAL.POSE.SYS // v2.0</div>
+    <h1><span class="r">左一人</span><span class="sep"> + </span><span class="b">右一人</span></h1>
+    <p class="header-sub">
+      LEFT：單人對應動作 &nbsp;/&nbsp; RIGHT：單人呼應動作<br>
+      各自獨立生成 — 合在一起像一組互動畫面
     </p>
   </div>
   <div class="concept-badge">
@@ -676,9 +917,9 @@
   </div>
 </div>
 
-<div style="max-width:1100px;margin:0 auto;padding:0 1rem">
+<div style="max-width:1100px;margin:0 auto;padding:0 1rem;position:relative;z-index:1">
 
-  <!-- Mobile tabs only -->
+  <!-- Mobile tabs -->
   <div class="tabs" id="tabs" style="margin-bottom:1rem"></div>
 
   <div class="layout">
@@ -694,10 +935,10 @@
 
       <!-- TOOLBAR -->
       <div class="toolbar">
-        <button class="random-btn" onclick="randomPick()">🎲 隨機選一組</button>
+        <button class="random-btn" onclick="randomPick()">⟳ 隨機選一組</button>
         <button class="filter-btn" id="filterFav" onclick="toggleFavFilter()">★ 只看收藏</button>
         <div class="toolbar-spacer"></div>
-        <button class="swap-btn" onclick="swapLR()">⇄ 左右人物互換</button>
+        <button class="swap-btn" onclick="swapLR()">⇄ 左右互換</button>
       </div>
 
       <!-- INLINE SELECTION PREVIEW -->
@@ -771,14 +1012,14 @@
       </div>
 
       <div class="gen-wrap">
-        <button class="gen-btn" id="genBtn" onclick="generate()">✦ 生成提示詞</button>
+        <button class="gen-btn" id="genBtn" onclick="generate()">▶ 生成提示詞</button>
       </div>
 
       <!-- OUTPUT -->
       <div id="output">
 
         <div class="tip-box">
-          <strong>💡 使用說明</strong>
+          <strong>// USAGE</strong>
           下方是合圖提示詞，直接貼入 ChatGPT / DALL-E 或 Midjourney 即可一次生成左右兩格的完整畫面。
         </div>
 
@@ -786,22 +1027,22 @@
 
         <!-- FORMAT TABS -->
         <div class="format-tabs">
-          <button class="fmt-tab active" onclick="setFormat('dalle', this)">✦ DALL-E / ChatGPT</button>
-          <button class="fmt-tab" onclick="setFormat('mj', this)">🪄 Midjourney</button>
+          <button class="fmt-tab active" onclick="setFormat('dalle', this)">▶ DALL-E / ChatGPT</button>
+          <button class="fmt-tab" onclick="setFormat('mj', this)">✦ Midjourney</button>
         </div>
 
         <div class="prompt-block">
-          <h3><span class="pill pill-both">✦ 合圖提示詞</span> 直接貼入生成工具</h3>
+          <h3><span class="pill pill-both">// PROMPT</span> 直接貼入生成工具</h3>
           <div class="prompt-text" id="promptCombine"></div>
           <div class="char-count" id="charCount"></div>
-          <button class="copy-btn" onclick="copyText('promptCombine', this)">[ 複製提示詞 ]</button>
+          <button class="copy-btn" onclick="copyText('promptCombine', this)">[ COPY PROMPT ]</button>
         </div>
 
       </div>
 
       <!-- HISTORY -->
       <div class="history-panel" style="margin-top:2rem">
-        <h3>🕘 最近生成紀錄</h3>
+        <h3>// RECENT LOG</h3>
         <div class="history-list" id="historyList"></div>
       </div>
 
@@ -3133,6 +3374,255 @@ const DATA = {
       diff: "easy"
     },
   ],
+
+  "🥋 古代 / 武俠": [
+    {
+      label: "拱手行禮 ↔ 回禮躬身",
+      desc: "左：雙手交疊胸前拱手，身體微微前傾，表情恭謹有禮／右：回以拱手，躬身略深，表情謙遜以對",
+      iconL: "🙏", iconR: "🫡",
+      nameL: "拱手施禮", nameR: "躬身回禮",
+      enL: "A person standing with both hands clasped together at chest height in a respectful bow gesture, body slightly inclined forward, expression dignified and courteous. Full body visible. They are alone. No objects.",
+      enR: "A person returning the bow — hands clasped at chest, body bent slightly deeper in a humble return salute, expression respectful. Full body visible. They are alone. No objects.",
+      tag: "古代禮儀",
+      diff: "easy"
+    },
+    {
+      label: "單膝跪地俯首 ↔ 俯視賜禮側身",
+      desc: "左：單膝跪地，低頭俯首，雙手貼大腿，表情虔誠順服／右：側身而立，一手微抬示意，表情威儀從容",
+      iconL: "🧎", iconR: "👑",
+      nameL: "跪地臣服", nameR: "威儀賜禮",
+      enL: "A person kneeling on one knee, head bowed low, hands resting flat on thighs, expression solemn and reverent. Full body visible. They are alone. No objects.",
+      enR: "A person standing tall, one hand slightly raised with an open palm in a bestowing gesture, head slightly tilted down, expression composed and authoritative. Full body visible. They are alone. No objects.",
+      tag: "臣服賜禮",
+      diff: "mid"
+    },
+    {
+      label: "側身出拳攻擊 ↔ 側步閃避",
+      desc: "左：側身馬步，一拳向右方打出，腰部發力，表情專注凌厲／右：側步躍開，身體向右閃，重心低沉，表情警覺",
+      iconL: "👊", iconR: "🏃",
+      nameL: "出拳攻擊", nameR: "側步閃避",
+      enL: "A person in a wide martial arts horse stance, one fist punching powerfully toward the RIGHT, body twisted at the waist for maximum force, expression fierce and focused. Full body visible. They are alone. No objects.",
+      enR: "A person lunging sideways to evade, weight dropped low, one foot sweeping out, arms raised defensively, expression sharp and alert. Full body visible. They are alone. No objects.",
+      tag: "武打攻避",
+      diff: "mid"
+    },
+    {
+      label: "縱身躍起踢腿 ↔ 後仰閃開踢擊",
+      desc: "左：縱身躍起，一腳向右方踢出，身體騰空，表情爆發／右：身體急速後仰，上半身幾乎平行地面躲開踢擊，雙腳仍穩",
+      iconL: "🦵", iconR: "🤸",
+      nameL: "騰空飛踢", nameR: "後仰閃躲",
+      enL: "A person leaping into the air, one leg extended in a powerful flying kick toward the RIGHT, expression explosive and determined. Full body visible. They are alone. No objects.",
+      enR: "A person bending backward dramatically, upper body nearly parallel to the ground dodging an invisible kick, legs planted wide, expression tense and reactive. Full body visible. They are alone. No objects.",
+      tag: "飛踢閃躲",
+      diff: "hard"
+    },
+    {
+      label: "推掌發勁 ↔ 被勁風吹退後仰",
+      desc: "左：雙掌向前推出，身體微前傾，臉色凝重，像發出一股內勁／右：沒被接觸卻身體後仰，像被無形氣勁推退",
+      iconL: "🤲", iconR: "💨",
+      nameL: "推掌發勁", nameR: "被勁退後",
+      enL: "A person pushing both palms forward, body slightly forward, expression deeply concentrated, as if projecting force without contact. Full body visible. They are alone. No objects.",
+      enR: "A person staggering backward as if struck by an invisible force, body arching away, expression stunned and overwhelmed. Full body visible. They are alone. No objects.",
+      tag: "內力發勁",
+      diff: "hard"
+    },
+    {
+      label: "轉身背對離去 ↔ 目送佇立不動",
+      desc: "左：轉身背對，頭微低，表情決然離去／右：原地佇立，正面朝向左方，雙手自然垂下，目送，表情複雜",
+      iconL: "🚶", iconR: "🧍",
+      nameL: "轉身離去", nameR: "目送佇立",
+      enL: "A person turning away, head slightly bowed, expression resolute yet heavy — walking away. Full body visible. They are alone. No objects.",
+      enR: "A person standing still, facing the LEFT of frame, arms at their sides, expression layered with longing and resignation — watching someone leave. Full body visible. They are alone. No objects.",
+      tag: "離別目送",
+      diff: "easy"
+    },
+    {
+      label: "單手擋格護身 ↔ 逼近出手",
+      desc: "左：一手橫在胸前做擋格姿勢，身體側身，腿部穩紮，表情臨危不亂／右：手臂向左前方逼近，身體前傾，表情凌厲",
+      iconL: "🛡️", iconR: "🥊",
+      nameL: "擋格護身", nameR: "逼近出手",
+      enL: "A person in a defensive martial stance, one forearm raised horizontally across the chest to block, body turned sideways, legs braced low, expression calm under pressure. Full body visible. They are alone. No objects.",
+      enR: "A person lunging forward with one arm extended toward the LEFT, body weight forward, other hand pulled back, expression intense and piercing. Full body visible. They are alone. No objects.",
+      tag: "武打攻防",
+      diff: "hard"
+    },
+  ],
+
+  "🐾 忠犬 / 跟隨": [
+    {
+      label: "大步往前走 ↔ 小跑步跟上",
+      desc: "左：大步流星往前走，頭不回，表情自然隨意／右：小跑步努力跟上，步伐急促，表情專注不掉隊",
+      iconL: "🚶", iconR: "🏃",
+      nameL: "大步前行", nameR: "小跑跟上",
+      enL: "A person walking forward confidently with long strides, head facing forward, expression casual and unhurried. Full body visible. They are alone. No objects.",
+      enR: "A person jogging at a quick trot to keep up, short urgent steps, expression focused and slightly breathless — determined not to fall behind. Full body visible. They are alone. No objects.",
+      tag: "跟隨步伐",
+      diff: "easy"
+    },
+    {
+      label: "隨手一指方向 ↔ 立刻轉頭望去",
+      desc: "左：漫不經心地側手一指，視線不在意地看別處，表情隨意／右：瞬間轉頭看向左方手指的方向，眼神立刻集中，表情認真回應",
+      iconL: "☝️", iconR: "👀",
+      nameL: "隨意一指", nameR: "立刻回應",
+      enL: "A person casually pointing to one side with one finger, gaze drifting elsewhere, expression relaxed and offhand. Full body visible. They are alone. No objects.",
+      enR: "A person snapping their head to look in the direction of the LEFT figure's point, eyes sharp and immediately focused, expression alert and eager to respond. Full body visible. They are alone. No objects.",
+      tag: "立即回應",
+      diff: "easy"
+    },
+    {
+      label: "停步不回頭開口 ↔ 立刻煞住立正",
+      desc: "左：走到一半停下，不回頭，嘴微開像在說話，姿態從容有威儀／右：立刻煞住腳步，身體繃直立正，雙手貼側，表情專注聆聽",
+      iconL: "🧍", iconR: "💂",
+      nameL: "停步開口", nameR: "立正候命",
+      enL: "A person halting mid-walk, not turning around, lips slightly parted as if speaking, posture calm and commanding. Full body visible. They are alone. No objects.",
+      enR: "A person stopping abruptly, spine snapping straight, arms flat at sides, chin up, expression attentive and fully at attention — ready to receive orders. Full body visible. They are alone. No objects.",
+      tag: "候命立正",
+      diff: "easy"
+    },
+    {
+      label: "輕描淡寫摸頭誇獎 ↔ 整個人高興到快跳起來",
+      desc: "左：漫不經心地伸手摸了一下虛空的頭頂，表情淡然甚至有點不在意／右：整個人激動到身體微微前傾，雙拳握緊，嘴角壓不住，幾乎要跳起來",
+      iconL: "🤚", iconR: "🥹",
+      nameL: "淡然誇獎", nameR: "激動受寵",
+      enL: "A person reaching out one hand at head height as if absentmindedly patting someone's head, expression nonchalant, almost indifferent. Full body visible. They are alone. No objects.",
+      enR: "A person on the verge of jumping, body leaning forward, both fists clenched at sides, smile breaking through despite trying to contain it — overwhelmed with being praised. Full body visible. They are alone. No objects.",
+      tag: "誇獎受寵",
+      diff: "easy"
+    },
+    {
+      label: "冷眼轉頭不看 ↔ 悶悶蹲下垂頭",
+      desc: "左：微微側臉轉開，眼神避開，表情冷淡甚至帶一絲不耐／右：整個人慢慢蹲下去，雙手搭膝，頭低下來，表情悶悶的像被冷落的小動物",
+      iconL: "😒", iconR: "🥺",
+      nameL: "冷眼轉開", nameR: "悶悶蹲下",
+      enL: "A person turning their head slightly away, gaze averted, expression cool and faintly impatient. Full body visible. They are alone. No objects.",
+      enR: "A person slowly sinking into a crouch, hands resting on knees, head drooping — expression quietly dejected, like a puppy that has been ignored. Full body visible. They are alone. No objects.",
+      tag: "被冷落蹲下",
+      diff: "easy"
+    },
+    {
+      label: "起身準備離開 ↔ 馬上站起來跟著",
+      desc: "左：從坐姿站起，身體前傾準備移動，表情自然，沒有特別招呼人／右：幾乎同時彈起，雙腿用力站立，眼看著左方，表情有點急著跟上",
+      iconL: "🧍", iconR: "⬆️",
+      nameL: "起身離開", nameR: "彈起跟上",
+      enL: "A person rising from a seated posture, body leaning forward about to move, expression casual — not particularly signaling to anyone. Full body visible. They are alone. No objects.",
+      enR: "A person springing upright almost simultaneously, legs pushing off with energy, eyes fixed on the LEFT figure, expression slightly urgent — not wanting to be left behind. Full body visible. They are alone. No objects.",
+      tag: "同步起身",
+      diff: "easy"
+    },
+    {
+      label: "擋在前方張臂護住 ↔ 渾然不知站在後面",
+      desc: "左：側身張開雙臂擋在前方，表情警覺緊繃，眼神盯著前方威脅，像在無聲保護身後的人／右：站在正後方，完全不知情，表情輕鬆甚至東張西望",
+      iconL: "🫸", iconR: "😶",
+      nameL: "張臂護衛", nameR: "渾然不知",
+      enL: "A person standing sideways with both arms spread wide in a protective stance, expression tense and alert, eyes locked forward — silently shielding someone behind them. Full body visible. They are alone. No objects.",
+      enR: "A person standing relaxed directly behind, completely unaware of being protected, expression easy-going, maybe glancing to the side. Full body visible. They are alone. No objects.",
+      tag: "默默守護",
+      diff: "mid"
+    },
+    {
+      label: "坐著不理 ↔ 蹲在旁邊仰頭等指示",
+      desc: "左：坐著，身體微側，表情淡定沒有看向右方，像在思考或發呆／右：蹲在左方旁邊，仰頭看著左方，雙手貼膝，表情期待乖巧，等著被理會",
+      iconL: "🪑", iconR: "🐶",
+      nameL: "坐著放空", nameR: "蹲旁仰頭等",
+      enL: "A person seated, body slightly turned, expression calm and distant — not looking toward the RIGHT, lost in thought. Full body visible. They are alone. No objects.",
+      enR: "A person crouching beside the LEFT figure, head tilted upward looking at them, hands flat on knees, expression patient and expectant — waiting to be acknowledged. Full body visible. They are alone. No objects.",
+      tag: "等待被理會",
+      diff: "easy"
+    },
+    {
+      label: "輕嘆氣轉身離開 ↔ 伸手想拉卻沒有拉",
+      desc: "左：輕嘆一口氣，轉身背對慢慢走，表情有些疲憊或失望／右：看著左方背影，一隻手微微抬起往前伸出，停在半空中沒有拉住，表情複雜不捨",
+      iconL: "🚶", iconR: "🫳",
+      nameL: "嘆氣離開", nameR: "伸手未拉",
+      enL: "A person turning away and walking off slowly, expression faintly weary or disappointed — a quiet exhale in their posture. Full body visible. They are alone. No objects.",
+      enR: "A person watching the LEFT figure leave, one hand half-raised and reaching forward — then stopping mid-air, not following through, expression conflicted and reluctant to let go. Full body visible. They are alone. No objects.",
+      tag: "伸手未拉",
+      diff: "mid"
+    },
+  ],
+
+  "👁️ 恐怖 / 詭異": [
+    {
+      label: "遠處靜止盯著 ↔ 察覺被盯渾身發毛",
+      desc: "左：站在遠處完全靜止，頭微低，雙眼直視前方，表情空洞毫無情緒，像在等待什麼／右：感覺到什麼，緩緩轉頭，瞳孔收縮，身體僵住，汗毛全豎",
+      iconL: "🧍", iconR: "😨",
+      nameL: "空洞凝視", nameR: "察覺僵住",
+      enL: "A person standing completely still in the distance, head slightly lowered, eyes staring straight ahead with an empty expression — no emotion, no movement, just watching. Full body visible. They are alone. No objects.",
+      enR: "A person slowly turning their head, eyes wide with creeping dread, body frozen mid-motion, every muscle locked — the realization that something has been watching them. Full body visible. They are alone. No objects.",
+      tag: "被盯上",
+      diff: "mid"
+    },
+    {
+      label: "緩慢無表情走近 ↔ 拼命往後退",
+      desc: "左：雙手垂在身側，步伐緩慢均勻，表情完全空白，眼神直視前方，像感應不到任何情緒的人形體／右：腳步倉皇往後退，身體後仰，手向前伸出試圖擋住，表情驚恐",
+      iconL: "🚶", iconR: "😱",
+      nameL: "空洞走近", nameR: "驚恐後退",
+      enL: "A person walking forward at a slow, perfectly even pace, arms hanging limp at sides, face completely blank — no emotion, no reaction, like something wearing a human shape. Full body visible. They are alone. No objects.",
+      enR: "A person stumbling backward in panic, one hand outstretched toward the LEFT as if to stop something, body leaning away, expression flooded with terror. Full body visible. They are alone. No objects.",
+      tag: "逼近驚逃",
+      diff: "mid"
+    },
+    {
+      label: "頭歪向一側空洞微笑 ↔ 看見後嚇到後退",
+      desc: "左：頭大幅度歪向肩膀，角度超出正常範圍，嘴角扯出一個笑，但眼神空洞毫無焦距，表情詭異而靜止／右：看見這個表情，整個人嚇到往後跌退一步，手抬起捂嘴，眼神驚恐",
+      iconL: "🙃", iconR: "😰",
+      nameL: "歪頭空洞笑", nameR: "嚇退捂嘴",
+      enL: "A person with their head tilted at an unnaturally sharp angle toward one shoulder, mouth stretched into a wide smile, but eyes completely vacant and unfocused — an expression that is wrong in a way that is hard to name. Full body visible. They are alone. No objects.",
+      enR: "A person stumbling back a step upon seeing the LEFT figure, hand flying up to cover their mouth, eyes wide with instinctive horror. Full body visible. They are alone. No objects.",
+      tag: "詭異笑容",
+      diff: "mid"
+    },
+    {
+      label: "身體往後彎成不自然弧度 ↔ 看傻眼動彈不得",
+      desc: "左：上半身往後彎曲，角度超乎人體正常極限，頭幾乎快碰到腳跟，四肢維持奇異的平衡，表情詭異平靜／右：眼睜睜看著，整個人嚇到石化，嘴微張，腳像釘在地上動不了",
+      iconL: "🔄", iconR: "😶",
+      nameL: "異常後彎", nameR: "石化呆立",
+      enL: "A person bending their upper body backward in an anatomically extreme arc, head nearly reaching behind their heels, limbs balanced in an eerie and inhuman posture, expression unnervingly calm. Full body visible. They are alone. No objects.",
+      enR: "A person frozen in place staring at the LEFT figure, mouth slightly open, feet rooted to the ground — completely petrified, unable to move or look away. Full body visible. They are alone. No objects.",
+      tag: "詭異後彎",
+      diff: "hard"
+    },
+    {
+      label: "站在正後方靠很近 ↔ 渾然不知背對站著",
+      desc: "左：悄無聲息站在右方人的正後方，靠得極近，低頭俯視對方後腦，表情空洞或帶著詭異笑意，對方完全沒發現／右：背對左方，完全不知情，姿態自然放鬆，渾然不覺身後有人貼近",
+      iconL: "👤", iconR: "🧍",
+      nameL: "悄悄貼近", nameR: "渾然不覺",
+      enL: "A person standing directly behind the RIGHT figure, unnervingly close, head tilted down to stare at the back of their head, expression hollow or carrying a faint unsettling smile — completely undetected. Full body visible. They are alone. No objects.",
+      enR: "A person standing relaxed with their back to the LEFT, completely unaware of the presence behind them, posture natural and at ease. Full body visible. They are alone. No objects.",
+      tag: "身後貼近",
+      diff: "hard"
+    },
+    {
+      label: "緩緩轉頭臉完全空白 ↔ 對視後整個人癱軟",
+      desc: "左：原本背對，開始極緩慢地轉頭，轉到正面時臉上毫無表情，眼神直視對方像看穿了什麼，令人不寒而慄／右：和左方對上視線的瞬間，雙腿一軟，緩緩滑坐下去，表情崩潰像靈魂被抽走",
+      iconL: "😐", iconR: "🫠",
+      nameL: "緩慢轉頭", nameR: "對視癱軟",
+      enL: "A person turning their head with excruciating slowness from facing away — until their face is fully forward, completely expressionless, eyes locking onto the viewer with an empty gaze that seems to look through rather than at. Full body visible. They are alone. No objects.",
+      enR: "A person the moment they meet the LEFT figure's eyes — knees buckling, body sliding slowly downward, expression collapsing as if their soul has been drained out. Full body visible. They are alone. No objects.",
+      tag: "對視崩潰",
+      diff: "hard"
+    },
+    {
+      label: "躲在角落蜷縮發抖 ↔ 緩慢推開虛空的門走進來",
+      desc: "左：縮在角落，雙膝抱胸，頭埋進膝蓋，肩膀細微顫抖，表情恐懼到極致，不敢抬頭／右：緩慢推開一扇虛空的門，側身走進來，頭微低，表情平靜得詭異，步伐不疾不徐",
+      iconL: "🫣", iconR: "🚪",
+      nameL: "角落蜷縮", nameR: "推門走入",
+      enL: "A person curled tightly in a corner, knees drawn to chest, face buried, shoulders trembling faintly — overwhelmed with dread, not daring to look up. Full body visible. They are alone. No objects.",
+      enR: "A person slowly pushing open an invisible door and stepping through sideways, head slightly bowed, expression eerily calm, pace unhurried and deliberate. Full body visible. They are alone. No objects.",
+      tag: "推門進入",
+      diff: "mid"
+    },
+    {
+      label: "用手指緩緩指向對方 ↔ 被指到全身僵直無法動彈",
+      desc: "左：手臂緩慢抬起，一根手指直直指向右方，表情空洞，眼神沒有焦點，像在執行某種無意識的指令／右：被手指指到的瞬間，全身僵直，雙手貼緊身側，眼神驚恐卻動彈不得，像被定住了",
+      iconL: "☝️", iconR: "🧊",
+      nameL: "緩慢指向", nameR: "被定身僵直",
+      enL: "A person raising their arm in slow motion, one finger pointing directly toward the RIGHT, expression vacant, eyes unfocused — as if executing some unconscious compulsion. Full body visible. They are alone. No objects.",
+      enR: "A person the instant they are pointed at — body snapping rigid, arms pinned at sides, eyes wide with terror but unable to move a single muscle, as if frozen in place by an invisible force. Full body visible. They are alone. No objects.",
+      tag: "指向定身",
+      diff: "hard"
+    },
+  ],
 };
 
 // ── DIFFICULTY MAP (for cards without explicit diff) ──
@@ -3244,12 +3734,12 @@ function restoreHistory(i) {
 function initTheme() {
   const saved = localStorage.getItem('dualpose_theme') || 'dark';
   document.body.classList.toggle('light', saved === 'light');
-  document.getElementById('themeToggle').textContent = saved === 'light' ? '🌙 深色' : '☀️ 淺色';
+  document.getElementById('themeToggle').textContent = saved === 'light' ? '◑ DARK' : '☀ LIGHT';
 }
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
   localStorage.setItem('dualpose_theme', isLight ? 'light' : 'dark');
-  document.getElementById('themeToggle').textContent = isLight ? '🌙 深色' : '☀️ 淺色';
+  document.getElementById('themeToggle').textContent = isLight ? '◑ DARK' : '☀ LIGHT';
 }
 
 // ── BUILD SIDEBAR ──
